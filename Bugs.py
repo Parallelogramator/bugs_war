@@ -31,6 +31,9 @@ class Bug:
         self.y = y
         self.speed = speed
         self.image = pygame.image.load('жуг.png')
+        self.bugs_right = pygame.image.load('жуг.png')
+        self.bugs_left = pygame.transform.flip(self.bugs_right, True, False)
+        self.image = self.bugs_right
         self.hp = 20
 
     def move_towards(self, target_x, target_y):
@@ -40,6 +43,10 @@ class Bug:
         dx /= dist
         dy /= dist
         new_x = self.x + dx * self.speed
+        if dx > 0:
+            self.image = self.bugs_left
+        else:
+            self.image = self.bugs_right
         new_y = self.y + dy * self.speed
         if 50 <= new_x <= win_width - 50 and 50 <= new_y <= win_height - 50:  # Проверка, не выходит ли жук за пределы окна или не врезается ли он в стены
             self.x = new_x
