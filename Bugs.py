@@ -11,10 +11,11 @@ win_width, win_height = 800, 600
 win = pygame.display.set_mode((win_width, win_height))
 
 # Загрузка изображений персонажа
-character_right = pygame.image.load('персонаж облаченный зеленый.png')
-character_left = pygame.transform.flip(character_right, True, False)
-character_up = pygame.transform.rotate(character_right, 0)
-character_down = pygame.transform.rotate(character_right, 0)
+
+character_left = pygame.image.load('персонаж облаченный зеленый.png')
+character_right = pygame.transform.flip(character_left, True, False)
+character_up = pygame.transform.rotate(character_left, 0)
+character_down = pygame.transform.rotate(character_left, 0)
 
 # Загрузка изображений персонажа и жука
 character = character_right
