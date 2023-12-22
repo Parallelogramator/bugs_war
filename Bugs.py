@@ -5,14 +5,16 @@ from random import randint
 pygame.init()
 
 # Установка размеров окна
-win_width, win_height = 800, 600
+infoObject = pygame.display.Info()
+win_width, win_height = infoObject.current_w, infoObject.current_h
 win = pygame.display.set_mode((win_width, win_height))
 
 # Загрузка изображений персонажа
 character_right = pygame.image.load('персонаж облаченный зеленый.png')
 character_left = pygame.transform.flip(character_right, True, False)
-character_up = pygame.transform.rotate(character_right, -90)
-character_down = pygame.transform.rotate(character_right, 90)
+
+# Загрузка изображения заднего плана
+background = pygame.image.load('задник.png')
 
 # Загрузка изображений персонажа и жука
 character = character_right
@@ -22,15 +24,16 @@ character_x, character_y = 50, 50
 vel = 5
 character_hp = 100
 
+# Установка параметров заднего плана
+bg_x, bg_y = 0, 0
+bg_width, bg_height = background.get_size()
+
 class Bug:
     def __init__(self, x, y, speed):
         self.x = x
         self.y = y
         self.speed = speed
         self.image = pygame.image.load('жуг.png')
-        self.bugs_right = pygame.image.load('жуг.png')
-        self.bugs_left = pygame.transform.flip(self.bugs_right, True, False)
-        self.image = self.bugs_right
         self.hp = 20
 
     def move_towards(self, target_x, target_y):
@@ -40,10 +43,6 @@ class Bug:
         dx /= dist
         dy /= dist
         new_x = self.x + dx * self.speed
-        if dx > 0:
-            self.image = self.bugs_left
-        else:
-            self.image = self.bugs_right
         new_y = self.y + dy * self.speed
         if 50 <= new_x <= win_width - 50 and 50 <= new_y <= win_height - 50:  # Проверка, не выходит ли жук за пределы окна или не врезается ли он в стены
             self.x = new_x
@@ -51,20 +50,13 @@ class Bug:
         return dist
 
     def draw(self, win):
-        win.blit(self.image, (self.x, self.y))
+        win.blit(self.image, (self.x - bg_x, self.y - bg_y))
 
 # Создание жуков
 bugs = [Bug(randint(0, 800), randint(0, 600), randint(1, 5))]
 start = time.time()
 
 font = pygame.font.Font(None, 36)  # Шрифт для отображения здоровья
-
-# Создание стен
-wall_thickness = 10
-walls = [pygame.Rect(0, 0, win_width, wall_thickness),  # Верхняя стена
-         pygame.Rect(0, win_height - wall_thickness, win_width, wall_thickness),  # Нижняя стена
-         pygame.Rect(0, 0, wall_thickness, win_height),  # Левая стена
-         pygame.Rect(win_width - wall_thickness, 0, wall_thickness, win_height)]  # Правая стена
 
 run = True
 while run:
@@ -84,10 +76,10 @@ while run:
 
     if keys[pygame.K_a]:  # Если нажата клавиша 'a', персонаж движется влево
         new_character_x -= vel
-        character = character_left  # Персонаж поворачивается влево
+        character = character_right  # Персонаж поворачивается влево
     if keys[pygame.K_d]:  # Если нажата клавиша 'd', персонаж движется вправо
         new_character_x += vel
-        character = character_right  # Персонаж поворачивается вправо
+        character = character_left  # Персонаж поворачивается вправо
     if keys[pygame.K_w]:  # Если нажата клавиша 'w', персонаж движется вверх
         new_character_y -= vel
     if keys[pygame.K_s]:  # Если нажата клавиша 's', персонаж движется вниз
@@ -98,9 +90,25 @@ while run:
         vel = 5
 
     # Проверка, не выходит ли персонаж за пределы окна или не врезается ли он в стены
-    if not any(wall.collidepoint(new_character_x, new_character_y) for wall in walls):
-        character_x = new_character_x
-        character_y = new_character_y
+
+
+    # Перемещение заднего плана, когда персонаж подходит к краю экрана
+    if new_character_x > win_width-50:
+        bg_x = (new_character_x - win_width + 50 )
+        new_character_x = character_x
+    if new_character_y > win_height - 50:
+        bg_y = (new_character_y - win_height + 50)
+        new_character_y = character_y
+    if new_character_x < bg_width - win_width - 50:
+        bg_x = - (bg_width - win_width - new_character_x)
+        new_character_x = character_x
+    if new_character_y < bg_height - win_height - 50:
+        bg_y = - (bg_height - win_height - new_character_y)
+        new_character_y = character_y
+
+    if 50 <= new_character_x <= win_width - 50 and 50 <= new_character_y <= win_height - 50 or 1:
+            character_x = new_character_x
+            character_y = new_character_y
 
     if keys[pygame.K_SPACE]:  # Если нажата клавиша 'space', персонаж "бьет" жуков
         for bug in bugs:
@@ -109,6 +117,7 @@ while run:
                 print("Персонаж бьет жука!")
 
     win.fill((0, 0, 0))  # Заполняем окно черным цветом
+    win.blit(background, (bg_x, bg_y))  # Рисуем задний план
     win.blit(character, (character_x, character_y))  # Рисуем персонажа
 
     for bug in bugs[:]:
@@ -121,15 +130,11 @@ while run:
             bugs.remove(bug)
             print("Жук убит!")
 
-    # Отображаем стены
-    for wall in walls:
-        pygame.draw.rect(win, (255, 255, 255), wall, 1)
-
     hp_text = font.render(f"Здоровье: {character_hp}", True, (255, 255, 255))
     if character_hp < 0:
         hp_text = font.render(f"Вы умерли", True, (255, 255, 255))
         bugs = []
-        start = time.time() + 10 * 10
+        start = time.time() + 10*10
     win.blit(hp_text, (20, 20))  # Отображаем здоровье персонажа
 
     pygame.display.update()  # Обновляем окно
