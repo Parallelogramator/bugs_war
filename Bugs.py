@@ -13,9 +13,10 @@ win = pygame.display.set_mode((win_width, win_height))
 # Загрузка изображений персонажа
 
 character_left = pygame.image.load('персонаж облаченный зеленый.png')
+position = character_left
 character_right = pygame.transform.flip(character_left, True, False)
-character_up = pygame.transform.rotate(character_left, 0)
-character_down = pygame.transform.rotate(character_left, 0)
+character_up = pygame.transform.rotate(position, 0)
+character_down = pygame.transform.rotate(position, 0)
 
 # Загрузка изображений персонажа и жука
 character = character_right
@@ -81,18 +82,20 @@ while run:
     new_character_x = character_x
     new_character_y = character_y
 
-    if keys[pygame.K_a]:  # Если нажата клавиша 'a', персонаж движется влево
+    if keys[pygame.K_a]:  # Если нажата клавиша 'a', персонаж движется влевоS
         new_character_x -= vel
         character = character_right  # Персонаж поворачивается влево
+        position = character_right
     if keys[pygame.K_d]:  # Если нажата клавиша 'd', персонаж движется вправо
         new_character_x += vel
         character = character_left  # Персонаж поворачивается вправо
+        position = character_left
     if keys[pygame.K_w]:  # Если нажата клавиша 'w', персонаж движется вверх
         new_character_y -= vel
-        character = character_up
+        character = pygame.transform.rotate(position, 0)
     if keys[pygame.K_s]:  # Если нажата клавиша 's', персонаж движется вниз
         new_character_y += vel
-        character = character_down
+        character = pygame.transform.rotate(position, 0)
     if keys[pygame.K_DOWN]:  # Если нажата клавиша 'shift', персонаж движется вниз
         vel = 100
     else:
