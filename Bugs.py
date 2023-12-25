@@ -130,25 +130,45 @@ while run:
         vel = 5
 
     # Проверка, не выходит ли персонаж за пределы окна или не врезается ли он в стены
+    prov_bg = True
+
+    if not(50 <= new_character_y <= win_height - 50) and not(50 <= new_character_x <= win_width - 50):
+        if new_character_y > win_height - 50:
+            bg_y -= vel
+        else:
+            bg_y += vel
+        if new_character_x > win_width - 50:
+            bg_x -= vel
+        else:
+            bg_x += vel
+
+        new_character_x = character_x
+        new_character_y = character_y
+
+        prov_bg = False
 
     if not(50 <= new_character_x <= win_width - 50):
         # Перемещение заднего плана, когда персонаж подходит к краю экрана
         if new_character_x > win_width - 50:
             bg_x -= vel
-
         else:
             bg_x += vel
 
         character_y = new_character_y
 
-    elif not(50 <= new_character_y <= win_height - 50):
+        prov_bg = False
+
+    if not(50 <= new_character_y <= win_height - 50):
         if new_character_y > win_height - 50:
             bg_y -= vel
         else:
             bg_y += vel
 
         character_x = new_character_x
-    else:
+
+        prov_bg = False
+
+    if prov_bg:
         character_x = new_character_x
         character_y = new_character_y
 
