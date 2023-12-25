@@ -1,31 +1,34 @@
+import pygame
 import math
 import time
 from random import randint
-
-import pygame
-
 pygame.init()
 
-# Чтение размеров экрана
-infoObject = pygame.display.Info()#cоздаем объект infoObject типа pygame.display.Info(), содержит информацию об экране
-win_width, win_height = infoObject.current_w, infoObject.current_h #win_width и win_height значения ширины и высоты окна соответственно
+# Установка размеров окна
+infoObject = pygame.display.Info()
+win_width, win_height = infoObject.current_w, infoObject.current_h
+win = pygame.display.set_mode((win_width, win_height))
 
-win = pygame.display.set_mode((win_width, win_height)) # Запуск окна размеров экрана#
-
-
-character_x, character_y = win_width// 2, win_height //2# где встанет персонаж
-vel = 5#хз, ща разберемся (может хп жука?)
-character_hp = 100# количество хп (жизней/здоровья)
-
-# работа с персонажем
+# Загрузка изображений персонажа
 player_left = pygame.image.load('персонаж облаченный зеленый.png')#сам спрайт (изночально персонаж повернут влево)
 player_left = pygame.transform.scale(player_left, (win_width// 400 * 70, win_width// 400 * 100)) #новые размеры персонажа
 position = player_left
 player_right = pygame.transform.flip(player_left, True, False)#прриколы с поворотом
 player = player_right
 
+# Загрузка изображения заднего плана
+background = pygame.image.load('просто представление карты.png')
+
+character_x, character_y = win_width// 2, win_height //2# где встанет персонаж
+vel = 5#хз, ща разберемся (может хп жука?)
+character_hp = 100# количество хп (жизней/здоровья)
+
+# Установка параметров заднего плана
+bg_x, bg_y = 0, 0
+bg_width, bg_height = background.get_size()
+
 class Bug:#
-    def __init__(self, x, y, speed):#
+    def __init__(self, x, y, speed, i):#
         self.x = x#
         self.y = y#
         self.speed = speed#
@@ -34,6 +37,7 @@ class Bug:#
         self.bugs_left = pygame.transform.flip(self.bugs_right, True, False)#
         self.image = self.bugs_right#
         self.hp = 20#
+        self.n  = i
 #
     def move_towards(self, target_x, target_y):#
         dx = target_x - self.x#
@@ -53,98 +57,115 @@ class Bug:#
         return dist#
 #
     def draw(self, win):#
-        win.blit(self.image, (self.x, self.y))#
-#
-# Создание жуков#
-bugs = [Bug(randint(0, win_width), randint(0, win_height), randint(1, 5))]#
+        win.blit(self.image, (self.x, self.y))
+
+    def p(self):
+        return self.n
+
+
+x = 1
+
+# Создание жуков
+bugs = [Bug(randint(0, win_width), randint(0, win_height), randint(1, 5), x)]#
 start = time.time()#
 x, y = 1, 1#
 wals = [(x, y)]#
 font = pygame.font.Font(None, 36)# создаем обьект шрифта
 #
-a = True
+vyhod = True# выход изи игры после проигрыша
 run = True
-while run:#
-    pygame.time.delay(100)#
-#
-    for event in pygame.event.get():#
-        if event.type == pygame.QUIT:#
-            run = False#
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:#
-            run = False#
-#
-    if time.time() - start > 5:#
-        bugs.append(Bug(randint(0, win_width), randint(0, win_height), randint(1, 5)))#
-        start = time.time()#
-        print("Bug")#
+while run:
+    pygame.time.delay(100)
 
-    keys = pygame.key.get_pressed()#
+    for event in pygame.event.get():  #
+        if event.type == pygame.QUIT:  #
+            run = False  #
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:  #
+            run = False  #
+    if time.time() - start > 5:
+        x += 1
+        bugs.append(Bug(randint(0, 800), randint(0, win_height), randint(1, 5), x))
+        start = time.time()
+        print("Bug")
+    keys = pygame.key.get_pressed()
 
-    new_character_x = character_x#
-    new_character_y = character_y#
+    new_character_x = character_x
+    new_character_y = character_y
 
+    if keys[pygame.K_a] and vyhod:
+        new_character_x -= vel  # - Если клавиша `a` нажата и `a` равно True, то значение `new_character_x` уменьшается на `vel`. Затем переменные `player` и `position` присваиваются значение `player_right`.
 
+        player = player_right  #
+        position = player_right  #
+    if keys[pygame.K_d] and vyhod:
+        new_character_x += vel  # - Если клавиша `d` нажата и `a` равно True, то значение `new_character_x` увеличивается на `vel`. Затем переменные `player` и `position` присваиваются значение `player_left`.
 
-
-    if keys[pygame.K_a] and a:
-        new_character_x -= vel#    - Если клавиша `a` нажата и `a` равно True, то значение `new_character_x` уменьшается на `vel`. Затем переменные `player` и `position` присваиваются значение `player_right`.
-
-        player = player_right#
-        position = player_right#
-    if keys[pygame.K_d]and a:
-        new_character_x += vel#    - Если клавиша `d` нажата и `a` равно True, то значение `new_character_x` увеличивается на `vel`. Затем переменные `player` и `position` присваиваются значение `player_left`.
-
-        player = player_left#
-        position = player_left#
-    if keys[pygame.K_w]and a:
-        new_character_y -= vel#     - Если клавиша `w` нажата и `a` равно True, то значение `new_character_y` уменьшается на `vel`. Затем переменная `player` присваивается повернутому изображению `position` на 0 градусов с помощью функции `pygame.transform.rotate`.
-
-        player = pygame.transform.rotate(position, 0)#
-    if keys[pygame.K_s]and a:
-        new_character_y += vel#    - Если клавиша `K_s` нажата и `a` равно True, то значение `new_character_y` увеличивается на `vel`. Затем переменная `player` присваивается повернутому изображению `position` на 0 градусов с помощью функции `pygame.transform.rotate`.
+        player = player_left  #
+        position = player_left  #
+    if keys[pygame.K_w] and vyhod:
+        new_character_y -= vel  # - Если клавиша `w` нажата и `a` равно True, то значение `new_character_y` уменьшается на `vel`. Затем переменная `player` присваивается повернутому изображению `position` на 0 градусов с помощью функции `pygame.transform.rotate`.
 
 
-        player = pygame.transform.rotate(position, 0)#
-    if keys[pygame.K_DOWN]and a:
-        vel = 100#    - Если клавиша `K_DOWN` нажата и `a` равно True, то значение `vel` устанавливается равным 100. В противном случае, значение `vel` устанавливается равным 5.
+    if keys[pygame.K_s] and vyhod:
+        new_character_y += vel  # - Если клавиша `K_s` нажата и `a` равно True, то значение `new_character_y` увеличивается на `vel`. Затем переменная `player` присваивается повернутому изображению `position` на 0 градусов с помощью функции `pygame.transform.rotate`.
 
-    else:#
-        vel = 5#
 
-    if 50 <= new_character_x <= win_width - 50 and 50 <= new_character_y <= win_height - 50 and (new_character_x,#
-                                                                                                 new_character_y) not in wals:#
-        character_x = new_character_x#
-        character_y = new_character_y#
+    if keys[pygame.K_DOWN] and vyhod:
+        vel = 100  # - Если клавиша `K_DOWN` нажата и `a` равно True, то значение `vel` устанавливается равным 100. В противном случае, значение `vel` устанавливается равным 5.
 
-    if keys[pygame.K_SPACE]:#
-        for bug in bugs:#
-            if math.sqrt((bug.x - character_x) ** 2 + (bug.y - character_y) ** 2) < 50:#
-                bug.hp -= 10#
+    else:  #
+        vel = 5  #
+
+    # Проверка, не выходит ли персонаж за пределы окна или не врезается ли он в стены
+
+    # базавая скорость
+    # Перемещение заднего плана, когда персонаж подходит к краю экрана
+    if new_character_x > win_width-50:
+        bg_x = (new_character_x - win_width + 50 )
+        new_character_x = character_x
+    if new_character_y > win_height - 50:
+        bg_y = (new_character_y - win_height + 50)
+        new_character_y = character_y
+    if new_character_x < bg_width - win_width - 50:
+        bg_x = - (bg_width - win_width - new_character_x)
+        new_character_x = character_x
+    if new_character_y < bg_height - win_height - 50:
+        bg_y = - (bg_height - win_height - new_character_y)
+        new_character_y = character_y
+
+    if 50 <= new_character_x <= win_width - 50 and 50 <= new_character_y <= win_height - 50 or 1:
+            character_x = new_character_x
+            character_y = new_character_y
+
+    if keys[pygame.K_SPACE]:  # Если нажата клавиша 'space', персонаж "бьет" жуков
+        for bug in bugs:
+            if math.sqrt((bug.x - character_x) ** 2 + (bug.y - character_y) ** 2) < 50:
+                bug.hp -= 10
                 print("Персонаж бьет жука!")
 
-    win.fill((0, 0, 0))#
-    win.blit(player, (character_x, character_y))#
+    win.fill((0, 0, 0))  # Заполняем окно черным цветом
+    win.blit(background, (bg_x, bg_y))  # Рисуем задний план
+    win.blit(player, (character_x, character_y))  # Рисуем персонажа
 
-    for bug in bugs[:]:#
-        dist = bug.move_towards(character_x, character_y)#
-        bug.draw(win)#
-        if dist < 50:#
-            character_hp -= 1#
-            print("Жук бьет персонажа!")
-        if bug.hp <= 0:#
-            bugs.remove(bug)#
+    for bug in bugs[:]:
+        dist = bug.move_towards(character_x, character_y)
+        bug.draw(win)
+        if dist < 50:
+            character_hp -= 1
+            print("Жук бьет персонажа!", bug.p())
+        if bug.hp <= 0:
+            bugs.remove(bug)
             print("Жук убит!")
 
-
-    hp_text = font.render(f"Здоровье: {character_hp}", True, (255, 255, 255))#
+    hp_text = font.render(f"Здоровье: {character_hp}", True, (255, 255, 255))  #
     if character_hp < 0:
-        hp_text = font.render(f"Вы умерли", True, (255, 255, 255))#
-        bugs = []#
-        start = time.time() + 10 * 10#
-        a = False#
+        hp_text = font.render(f"Вы умерли", True, (255, 255, 255))  #
+        bugs = []  #
+        start = time.time() + 10 * 10  #
+        a = False  #
     win.blit(hp_text, (20, 20))  # Отображаем здоровье персонажа
 
-    pygame.display.update()# Обновляем окно
-    pygame.display.update()#
+    pygame.display.update()  # Обновляем окно
+    pygame.display.update()  #
 
-pygame.quit()#
+pygame.quit()
