@@ -4,7 +4,7 @@ import pygame_menu
 #Экран + меню
 
 pygame.init()
-surface = pygame.display.set_mode((1280, 720), pygame.FULLSCREEN)
+surface = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
 
 def start_the_game():
     pass
@@ -14,7 +14,9 @@ def show_statistics():
 
 def show_settings():
     pass
-menu = pygame_menu.Menu('Жуки?', 1280, 720,
+
+
+menu = pygame_menu.Menu('Жуки?', 1920, 1080,
                        theme=pygame_menu.themes.THEME_BLUE)
 
 menu.add.text_input('Name :', default='')
