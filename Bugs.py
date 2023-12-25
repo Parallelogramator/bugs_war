@@ -32,17 +32,14 @@ bg_width, bg_height = background.get_size()
 
 
 class Bug:
-    def __init__(self, x, y, speed, i):
+    def __init__(self, x, y, speed):
         self.x = x
         self.y = y
         self.speed = speed
-        self.image = pygame.image.load('жуг.png')
         self.bugs_right = pygame.image.load('жуг.png')
         self.bugs_left = pygame.transform.flip(self.bugs_right, True, False)
         self.image = self.bugs_right
         self.hp = 20
-        self.n = i
-
 
     def move_towards(self, target_x, target_y):
         dx = target_x - self.x
@@ -56,29 +53,33 @@ class Bug:
         else:
             self.image = self.bugs_right
         new_y = self.y + dy * self.speed
-        if 50 <= new_x <= win_width - 50 and 50 <= new_y <= win_height - 50:
-            self.x = new_x
-            self.y = new_y
-        return dist
 
+        self.x = new_x
+        self.y = new_y
+        return dist
 
     def draw(self, win):
         win.blit(self.image, (self.x, self.y))
 
-    def p(self):
-        return self.n
+    def pos_bg(self,vel_x, vel_y):
+        self.x += vel_x
+        self.y += vel_y
 
+
+def soxrany_i_pomilui(vel_x, vel_y):
+    for bug in bugs:
+        bug.pos_bg(vel_x, vel_y)
 
 x = 1
 
 # Создание жуков
-bugs = [Bug(randint(0, win_width), randint(0, win_height), randint(1, 5), x)]
+bugs = [Bug(randint(0, win_width), randint(0, win_height), randint(1, 5))]
 start = time.time()
 x, y = 1, 1
 wals = [(x, y)]
 font = pygame.font.Font(None, 36)  # создаем обьект шрифта
 
-vyhod = True  # выход изи игры после проигрыша
+vyhod = True  # выход из игры после проигрыша
 run = True
 while run:
     pygame.time.delay(100)
@@ -90,7 +91,7 @@ while run:
             run = False
     if time.time() - start > 5:
         x += 1
-        bugs.append(Bug(randint(0, 800), randint(0, win_height), randint(1, 5), x))
+        bugs.append(Bug(randint(0, 800), randint(0, win_height), randint(1, 5)))
         start = time.time()
         print("Bug")
     keys = pygame.key.get_pressed()
@@ -128,16 +129,19 @@ while run:
 
     # Проверка, не выходит ли персонаж за пределы окна или не врезается ли он в стены
     prov_bg = True
-
+    vel_bg_x = 0
+    vel_bg_y = 0
     if not(50 <= new_character_y <= win_height - 50) and not(50 <= new_character_x <= win_width - 50):
-        if new_character_y > win_height - 50:
-            bg_y -= vel
-        else:
-            bg_y += vel
         if new_character_x > win_width - 50:
             bg_x -= vel
         else:
             bg_x += vel
+        if new_character_y > win_height - 50:
+            bg_y -= vel
+            vel_bg_y = -vel
+        else:
+            bg_y += vel
+            vel_bg_y = vel
 
         new_character_x = character_x
         new_character_y = character_y
@@ -148,8 +152,10 @@ while run:
         # Перемещение заднего плана, когда персонаж подходит к краю экрана
         if new_character_x > win_width - 50:
             bg_x -= vel
+            vel_bg_x = -vel
         else:
             bg_x += vel
+            vel_bg_x = vel
 
         character_y = new_character_y
 
@@ -158,8 +164,10 @@ while run:
     if not(50 <= new_character_y <= win_height - 50):
         if new_character_y > win_height - 50:
             bg_y -= vel
+            vel_bg_y = -vel
         else:
             bg_y += vel
+            vel_bg_y = vel
 
         character_x = new_character_x
 
@@ -168,6 +176,8 @@ while run:
     if prov_bg:
         character_x = new_character_x
         character_y = new_character_y
+
+    soxrany_i_pomilui(vel_bg_x, vel_bg_y)
 
     if keys[pygame.K_SPACE]:  # Если нажата клавиша 'space', персонаж "бьет" жуков
         for bug in bugs:
@@ -184,7 +194,7 @@ while run:
         bug.draw(win)
         if dist < 50:
             character_hp -= 1
-            print("Жук бьет персонажа!", bug.p())
+            print("Жук бьет персонажа!")
         if bug.hp <= 0:
             bugs.remove(bug)
             print("Жук убит!")
