@@ -14,8 +14,7 @@ win = pygame.display.set_mode((win_width, win_height))
 
 # Загрузка изображений персонажа
 player_left = pygame.image.load('персонаж облаченный зеленый.png')  # сам спрайт (изночально персонаж повернут влево)
-#player_left = pygame.transform.scale(player_left, (win_width // 400 * 70, win_width // 400 * 100))  # новые размеры персонажа
-position = player_left
+#player_left = pygame.transform.scale(player_left, (win_width // 400 * 70, win_width // 400 * 100))  # новые размеры персонажаладн
 player_right = pygame.transform.flip(player_left, True, False)  # прриколы с поворотом
 player = player_right
 
@@ -105,14 +104,12 @@ while run:
         # Затем переменные `player` и `position` присваиваются значение `player_right`.
 
         player = player_right
-        position = player_right
     if keys[pygame.K_d] and vyhod:
         new_character_x += vel  # - Если клавиша `d` нажата и `a` равно True,
         # то значение `new_character_x` увеличивается на `vel`.
         # Затем переменные `player` и `position` присваиваются значение `player_left`.
 
         player = player_left
-        position = player_left
     if keys[pygame.K_w] and vyhod:
         new_character_y -= vel  # - Если клавиша `w` нажата и `a` равно True,
         # то значение `new_character_y` уменьшается на `vel`.
