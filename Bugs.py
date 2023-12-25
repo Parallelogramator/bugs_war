@@ -78,7 +78,7 @@ start = time.time()
 x, y = 1, 1
 wals = [(x, y)]
 font = pygame.font.Font(None, 36)  # создаем обьект шрифта
-
+bugs_count = 0
 vyhod = True  # выход из игры после проигрыша
 run = True
 while run:
@@ -131,12 +131,12 @@ while run:
     prov_bg = True
     vel_bg_x = 0
     vel_bg_y = 0
-    if not(50 <= new_character_y <= win_height - 50) and not(50 <= new_character_x <= win_width - 50):
-        if new_character_x > win_width - 50:
+    if not(200 <= new_character_y <= win_height - 200) and not(200 <= new_character_x <= win_width - 200):
+        if new_character_x > win_width - 200:
             bg_x -= vel
         else:
             bg_x += vel
-        if new_character_y > win_height - 50:
+        if new_character_y > win_height - 200:
             bg_y -= vel
             vel_bg_y = -vel
         else:
@@ -148,9 +148,9 @@ while run:
 
         prov_bg = False
 
-    if not(50 <= new_character_x <= win_width - 50):
+    if not(200 <= new_character_x <= win_width - 200):
         # Перемещение заднего плана, когда персонаж подходит к краю экрана
-        if new_character_x > win_width - 50:
+        if new_character_x > win_width - 200:
             bg_x -= vel
             vel_bg_x = -vel
         else:
@@ -161,8 +161,8 @@ while run:
 
         prov_bg = False
 
-    if not(50 <= new_character_y <= win_height - 50):
-        if new_character_y > win_height - 50:
+    if not(200 <= new_character_y <= win_height - 200):
+        if new_character_y > win_height - 200:
             bg_y -= vel
             vel_bg_y = -vel
         else:
@@ -181,7 +181,7 @@ while run:
 
     if keys[pygame.K_SPACE]:  # Если нажата клавиша 'space', персонаж "бьет" жуков
         for bug in bugs:
-            if math.sqrt((bug.x - character_x) ** 2 + (bug.y - character_y) ** 2) < 50:
+            if math.sqrt((bug.x - character_x) ** 2 + (bug.y - character_y) ** 2) < 200:
                 bug.hp -= 10
                 print("Персонаж бьет жука!")
 
@@ -192,20 +192,23 @@ while run:
     for bug in bugs:
         dist = bug.move_towards(character_x, character_y)
         bug.draw(win)
-        if dist < 50:
+        if dist < 200:
             character_hp -= 1
             print("Жук бьет персонажа!")
         if bug.hp <= 0:
             bugs.remove(bug)
             print("Жук убит!")
+            bugs_count += 1
 
     hp_text = font.render(f"Здоровье: {character_hp}", True, (255, 255, 255))
+    bugs_count_text = font.render(f"Количество убитых жуков: {bugs_count}, ЖИВОДЁР!", True, (255, 255, 255))
     if character_hp <= 0:
         hp_text = font.render(f"Вы умерли", True, (255, 255, 255))
         bugs = []
         start = time.time() + 10 * 10
         a = False
-    win.blit(hp_text, (20, 20))  # Отображаем здоровье персонажа
+    win.blit(hp_text, (20, 20))
+    win.blit(bugs_count_text, (750, 20))  # Отображаем здоровье персонажа
 
     pygame.display.update()  # Обновляем окно
 
