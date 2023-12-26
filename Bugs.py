@@ -14,7 +14,7 @@ win = pygame.display.set_mode((win_width, win_height))
 
 # Загрузка изображений персонажа
 player_left = pygame.image.load('персонаж облаченный зеленый.png')  # сам спрайт (изночально персонаж повернут влево)
-# player_left = pygame.transform.scale(player_left, (win_width // 400 * 70, win_width // 400 * 100))  # новые размеры персонажаладн
+# player_left = pygame.transform.scale(player_left, (win_width//400*70, win_width//400*100))  # новые размеры персонажа
 player_right = pygame.transform.flip(player_left, True, False)  # прриколы с поворотом
 player = player_right
 
@@ -190,9 +190,9 @@ while run:
     win.blit(player, (character_x, character_y))  # Рисуем персонажа
 
     for bug in bugs:
-        dist = bug.move_towards(character_x, character_y)  #
+        dist = bug.move_towards(character_x, character_y)
         bug.draw(win)
-        if dist < 200:
+        if dist < 50:
             character_hp -= 1
             print("Жук бьет персонажа!")
         if bug.hp <= 0:
@@ -206,7 +206,7 @@ while run:
         hp_text = font.render(f"Вы умерли", True, (255, 255, 255))
         bugs = []
         start = time.time() + 10 * 10
-        a = False
+        run = False
     win.blit(hp_text, (20, 20))
     win.blit(bugs_count_text, (750, 20))  # Отображаем здоровье персонажа
 
