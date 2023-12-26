@@ -9,12 +9,12 @@ pygame.init()
 # Установка размеров окна
 infoObject = pygame.display.Info()
 win_width, win_height = infoObject.current_w, infoObject.current_h
-#win_width, win_height = 1000, 1000
+# win_width, win_height = 1000, 1000
 win = pygame.display.set_mode((win_width, win_height))
 
 # Загрузка изображений персонажа
 player_left = pygame.image.load('персонаж облаченный зеленый.png')  # сам спрайт (изночально персонаж повернут влево)
-#player_left = pygame.transform.scale(player_left, (win_width // 400 * 70, win_width // 400 * 100))  # новые размеры персонажаладн
+# player_left = pygame.transform.scale(player_left, (win_width // 400 * 70, win_width // 400 * 100))  # новые размеры персонажаладн
 player_right = pygame.transform.flip(player_left, True, False)  # прриколы с поворотом
 player = player_right
 
@@ -61,7 +61,7 @@ class Bug:
     def draw(self, win):
         win.blit(self.image, (self.x, self.y))
 
-    def pos_bg(self,vel_x, vel_y):
+    def pos_bg(self, vel_x, vel_y):
         self.x += vel_x
         self.y += vel_y
 
@@ -131,7 +131,7 @@ while run:
     prov_bg = True
     vel_bg_x = 0
     vel_bg_y = 0
-    if not(200 <= new_character_y <= win_height - 200) and not(200 <= new_character_x <= win_width - 200):
+    if not (200 <= new_character_y <= win_height - 200) and not (200 <= new_character_x <= win_width - 200):
         if new_character_x > win_width - 200:
             bg_x -= vel
         else:
@@ -148,7 +148,7 @@ while run:
 
         prov_bg = False
 
-    if not(200 <= new_character_x <= win_width - 200):
+    if not (200 <= new_character_x <= win_width - 200):
         # Перемещение заднего плана, когда персонаж подходит к краю экрана
         if new_character_x > win_width - 200:
             bg_x -= vel
@@ -161,7 +161,7 @@ while run:
 
         prov_bg = False
 
-    if not(200 <= new_character_y <= win_height - 200):
+    if not (200 <= new_character_y <= win_height - 200):
         if new_character_y > win_height - 200:
             bg_y -= vel
             vel_bg_y = -vel
@@ -190,15 +190,15 @@ while run:
     win.blit(player, (character_x, character_y))  # Рисуем персонажа
 
     for bug in bugs:
-        dist = bug.move_towards(character_x, character_y)#
+        dist = bug.move_towards(character_x, character_y)  #
         bug.draw(win)
         if dist < 200:
             character_hp -= 1
             print("Жук бьет персонажа!")
         if bug.hp <= 0:
+            bugs_count += 1
             bugs.remove(bug)
             print("Жук убит!")
-
 
     hp_text = font.render(f"Здоровье: {character_hp}", True, (255, 255, 255))
     bugs_count_text = font.render(f"Количество убитых жуков: {bugs_count}, ЖИВОДЁР!", True, (255, 255, 255))
@@ -210,7 +210,6 @@ while run:
     win.blit(hp_text, (20, 20))
     win.blit(bugs_count_text, (750, 20))  # Отображаем здоровье персонажа
 
-    pygame.display.update()# Обновляем окно
-    pygame.display.update()#
+    pygame.display.update()  # Обновляем окно
 
 pygame.quit()
