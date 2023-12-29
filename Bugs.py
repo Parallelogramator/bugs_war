@@ -281,9 +281,9 @@ def game(background):
 
     # Создание жуков
     bugs = [Bug(randint(0, win_width), randint(0, win_height), randint(1, 5))]
-    artifacts = [Artifact(randint(0, bg_width), randint(0, bg_height), 'изображение_viber_2022-05-12_23-33-42-501.jpg'),
-                 Artifact(randint(0, bg_width), randint(0, bg_height), 'изображение_viber_2022-05-12_23-33-42-501.jpg'),
-                 Artifact(randint(0, bg_width), randint(0, bg_height), 'изображение_viber_2022-05-12_23-33-42-501.jpg')]
+    artifacts = [Artifact(randint(0, bg_width), randint(0, bg_height), 'Инфа.png'),
+                 Artifact(randint(0, bg_width), randint(0, bg_height), 'Инфа.png'),
+                 Artifact(randint(0, bg_width), randint(0, bg_height), 'Инфа.png')]
     armors = []
     weapons = []
 
@@ -334,13 +334,13 @@ def game(background):
             if bug.hp <= 0:
                 print("Жук убит!")
                 bugs_count += 1
-                if randint(0, bugs_count) == 5 or 1:
+                if randint(0, bugs_count) == 5:
                     armors.append(Armor(bug.x, bug.y,
-                                        'изображение_viber_2022-05-12_23-33-42-501.jpg', randint(0, 10),
+                                        'Инфа.png', randint(0, 10),
                                         randint(0, 10)))
-                if randint(0, bugs_count) == 7 or 1:
+                if randint(0, bugs_count) == 7:
                     weapons.append(Weapon(bug.x, bug.y,
-                                          'изображение_viber_2022-05-12_23-33-42-501.jpg', randint(0, 10),
+                                          'Инфа.png', randint(0, 10),
                                           randint(0, 10)))
                 bugs.remove(bug)
 
