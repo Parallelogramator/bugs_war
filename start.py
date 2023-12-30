@@ -1,7 +1,7 @@
 import pygame
 import pygame_menu
 
-from Bugs import game
+from Bugs import Game
 
 
 # Экран + меню
@@ -30,6 +30,7 @@ class Start_Window:
                                 theme=mytheme)
         # Кнопки
         menu.add.text_input('Name :', default='')
+        menu.add.button('New game', self.start_the_new_game)
         menu.add.button('Play', self.start_the_game)
         menu.add.button('Settings', self.show_settings)
         menu.add.button('Statistics', self.show_statistics)
@@ -37,9 +38,14 @@ class Start_Window:
         menu.center_content()
         menu.mainloop(surface)
 
+    def start_the_new_game(self):
+        # начать игру
+        self.game = Game(self.background)
+        self.game.game()
+
     def start_the_game(self):
         # начать игру
-        game(self.background)
+        self.game.game()
 
     def show_statistics(self):  # показать статистику
         pass
