@@ -1,6 +1,6 @@
 import time
-from random import randint
 from math import sqrt
+from random import randint
 
 import pygame
 
@@ -68,11 +68,10 @@ class Game:
         # Создание жуков
         self.bugs = [Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5))]
         self.artifacts = [Artifact(randint(0, bg_width), randint(0, bg_height), 'Инфа.png'),
-                     Artifact(randint(0, bg_width), randint(0, bg_height), 'Инфа.png'),
-                     Artifact(randint(0, bg_width), randint(0, bg_height), 'Инфа.png')]
+                          Artifact(randint(0, bg_width), randint(0, bg_height), 'Инфа.png'),
+                          Artifact(randint(0, bg_width), randint(0, bg_height), 'Инфа.png')]
         self.armors = []
         self.weapons = []
-
 
         x, y = 1, 1
         # self.walls = [(x, y)]
@@ -124,18 +123,20 @@ class Game:
                     self.bugs_count += 1
                     if randint(0, self.bugs_count) == 5:
                         self.armors.append(Armor(bug.x, bug.y,
-                                            'Инфа.png', randint(1, 10),
-                                            randint(1, 10)))
+                                                 'Инфа.png', randint(1, 10),
+                                                 randint(1, 10)))
                     if randint(0, self.bugs_count) == 7:
                         self.weapons.append(Weapon(bug.x, bug.y,
-                                              'Инфа.png', randint(1, 10),
-                                              randint(1, 10)))
+                                                   'Инфа.png', randint(1, 10),
+                                                   randint(1, 10)))
                     self.bugs.remove(bug)
 
-            prov_game_objects(self.artifacts, self.weapons, self.armors, self.win, self.character_x, self.character_y, self.player)
+            prov_game_objects(self.artifacts, self.weapons, self.armors, self.win, self.character_x, self.character_y,
+                              self.player)
 
             hp_text = self.font.render(f"Здоровье: {self.player.hp}", True, (255, 255, 255))
-            self.bugs_count_text = self.font.render(f"Количество убитых жуков: {self.bugs_count}, ЖИВОДЁР!", True, (255, 255, 255))
+            self.bugs_count_text = self.font.render(f"Количество убитых жуков: {self.bugs_count}, ЖИВОДЁР!", True,
+                                                    (255, 255, 255))
             if self.player.hp <= 0:
                 hp_text = self.font.render(f"Вы умерли", True, (255, 255, 255))
                 self.bugs = []
@@ -155,6 +156,7 @@ class Game:
             self.win.blit(self.bugs_count_text, (750, 20))  # Отображаем здоровье персонажа
 
             pygame.display.update()  # Обновляем окно
+
 
 if __name__ == "__main__":
     pygame.init()
