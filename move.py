@@ -1,6 +1,7 @@
 import pygame
 from math import sqrt
 
+
 class Players:
     def __init__(self, x, y, win_width, win_height):
         self.x = x
@@ -135,14 +136,15 @@ class Players:
     def rang(self):
         return self.weapon[self.current_weapon].get('rang')
 
+
 class Bug:
     def __init__(self, x, y, speed):
         self.x = x
         self.y = y
         self.speed = speed
-        self.bugs_right = pygame.image.load('жуг.png')
-        self.bugs_left = pygame.transform.flip(self.bugs_right, True, False)
-        self.image = self.bugs_right
+        self.bug_right = pygame.image.load('жуг.png')
+        self.bug_left = pygame.transform.flip(self.bug_right, True, False)
+        self.image = self.bug_right
         self.hp = 20
 
     def move_towards(self, target_x, target_y):
@@ -153,9 +155,9 @@ class Bug:
         dy /= dist
         new_x = self.x + dx * self.speed
         if dx > 0:
-            self.image = self.bugs_left
+            self.image = self.bug_left
         else:
-            self.image = self.bugs_right
+            self.image = self.bug_right
         new_y = self.y + dy * self.speed
 
         self.x = new_x

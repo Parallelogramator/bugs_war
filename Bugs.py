@@ -168,6 +168,10 @@ class Game:
         self.player.player_left = pygame.image.tostring(self.player.player_left, "RGBA")
         self.player.player_right = ''
         self.player.image = ''
+        for bug in self.bugs:
+            bug.bug_right = pygame.image.tostring(bug.bug_right, "RGBA")
+            bug.bug_left = ''
+            bug.image = ''
 
         '''self.player_left = pygame.image.load(
             'персонаж облаченный зеленый.png')  # сам спрайт (изначально персонаж повернут влево)
@@ -182,7 +186,6 @@ class Game:
         bytes()
         state['armors'] = []
         state['weapons'] = []
-        state['bugs'] = []
         state['artifacts'] = []
 
         a['player'] = 0
@@ -196,11 +199,15 @@ class Game:
     def __setstate__(self, state):
         self.__dict__.update(state)
         self.win = pygame.display.set_mode((self.win_width, self.win_height))
+
         self.player.player_left = pygame.image.fromstring(self.player.player_left, (70, 100), "RGBA")
         self.player.player_right = pygame.transform.flip(self.player.player_left, True, False)  # приколы с поворотом
 
         self.player.image = self.player.player_left
-
+        for bug in self.bugs:
+            bug.bug_right = pygame.image.fromstring(bug.bug_right, (50, 35), "RGBA")
+            bug.bug_left = pygame.transform.flip(bug.bug_right, True, False)
+            bug.image = bug.bug_right
 
 
 if __name__ == "__main__":
