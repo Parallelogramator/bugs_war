@@ -79,11 +79,12 @@ class Game:
 
     def game(self):
         font = pygame.font.Font(None, 36)
+        bg = pygame.image.fromstring(self.background, (self.bg_width, self.bg_height), "RGBA")
         run = True
         start = time.time()
         clock = pygame.time.Clock()
         while run:
-            clock.tick(100)
+            clock.tick(60)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -108,7 +109,7 @@ class Game:
                         print("Персонаж бьет жука!")
 
             self.win.fill((0, 0, 0))  # Заполняем окно черным цветом
-            self.win.blit(pygame.image.fromstring(self.background, (self.bg_width, self.bg_height), "RGBA"),
+            self.win.blit(bg,
                      (self.bg_x, self.bg_y))  # Рисуем задний план
             self.player.draw(self.win)  # Рисуем персонажа
 
