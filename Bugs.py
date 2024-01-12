@@ -19,15 +19,19 @@ player_right = pygame.transform.flip(player_left, True, False)  # пррикол
 player = player_right
 
 # Загрузка изображения заднего плана
-background = pygame.image.load('задник.png')
+# Загрузка изображения заднего плана
+background = pygame.image.load('просто представление карты.png')
 background = pygame.transform.scale(background, (win_width * 20, win_height * 20))  # новые размеры персонажа
+
+bg_x, bg_y = -win_width * 9.6, -win_height * 9.1
+bg_width, bg_height = background.get_size()
 
 character_x, character_y = win_width // 2, win_height // 2  # где встанет персонаж
 vel = 5  # хз, ща разберемся (может хп жука?)
 character_hp = 100  # количество хп (жизней/здоровья)
 
 # Установка параметров заднего плана
-bg_x, bg_y = 0, 0
+bg_x, bg_y = -win_width * 9.6, -win_height * 9.1
 bg_width, bg_height = background.get_size()
 
 
