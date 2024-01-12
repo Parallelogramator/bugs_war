@@ -1,7 +1,7 @@
 import time
 from math import sqrt
 from random import randint
-
+import pickle
 import pygame
 
 from move import Players, Bug
@@ -157,6 +157,25 @@ class Game:
 
             pygame.display.update()  # Обновляем окно
 
+        with open("savegame.dat", "wb") as fp:
+            pickle.dump(a, fp)
+
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+
+        state["background"] = pygame.image.tostring(state["background"], "RGBA")
+        state["win"] = pygame.image.tostring(state["win"], "RGBA")
+
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.background = pygame.image.fromstring(state["background"], "RGBA")
+        self.win = pygame.image.tostring(state["win"], "RGBA")
+
+
+
 
 if __name__ == "__main__":
     pygame.init()
@@ -168,4 +187,6 @@ if __name__ == "__main__":
                                         (win_width * 20, win_height * 20))  # новые размеры персонажа
 
     a = Game(background)
+
+
     a.game()
