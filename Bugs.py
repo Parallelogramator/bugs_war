@@ -91,7 +91,7 @@ class Game:
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     run = False
             if time.time() - start > 5:
-                self.bugs.append(Bug(randint(0, 800), randint(0, win_height), randint(1, 5)))
+                self.bugs.append(Bug(randint(0, 800), randint(0, self.win_height), randint(1, 5)))
                 start = time.time()
                 print("Bug")
             keys = pygame.key.get_pressed()
@@ -160,7 +160,7 @@ class Game:
             pygame.display.update()  # Обновляем окно
 
         with open("savegame.dat", "wb") as fp:
-            pickle.dump(a, fp)
+            pickle.dump(self, fp)
 
 
     def __getstate__(self):
@@ -172,6 +172,8 @@ class Game:
             bug.bug_right = pygame.image.tostring(bug.bug_right, "RGBA")
             bug.bug_left = ''
             bug.image = ''
+        for artifacts in self.artifacts:
+            artifacts.image = pygame.image.tostring(artifacts.image, "RGBA")
 
         '''self.player_left = pygame.image.load(
             'персонаж облаченный зеленый.png')  # сам спрайт (изначально персонаж повернут влево)
@@ -186,11 +188,6 @@ class Game:
         bytes()
         state['armors'] = []
         state['weapons'] = []
-        state['artifacts'] = []
-
-        a['player'] = 0
-        a['armors'] = []
-        a['weapons'] = []
         with open('test.txt', 'w+') as fp:
             fp.write(str(a))
 
@@ -208,6 +205,9 @@ class Game:
             bug.bug_right = pygame.image.fromstring(bug.bug_right, (50, 35), "RGBA")
             bug.bug_left = pygame.transform.flip(bug.bug_right, True, False)
             bug.image = bug.bug_right
+
+        for artifacts in self.artifacts:
+            artifacts.image = pygame.image.fromstring(artifacts.image, (30, 30), "RGBA")
 
 
 if __name__ == "__main__":

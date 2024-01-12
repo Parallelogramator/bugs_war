@@ -1,5 +1,6 @@
 import pygame
 import pygame_menu
+import pickle
 
 from Bugs import Game
 
@@ -44,8 +45,14 @@ class Start_Window:
         self.game.game()
 
     def start_the_game(self):
-        # начать игру
-        self.game.game()
+        try:
+            self.game.game()
+
+        except Exception:
+            with open("savegame.dat", "rb") as fp:
+                self.game = pickle.load(fp)
+            self.game.game()
+
 
     def show_statistics(self):  # показать статистику
         pass
