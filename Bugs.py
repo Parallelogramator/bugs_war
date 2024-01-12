@@ -53,7 +53,7 @@ class Game:
         infoObject = pygame.display.Info()
         self.win_width, self.win_height = infoObject.current_w, infoObject.current_h
         # self.win_width, self.win_height = 1000, 1000
-        self.win = pygame.display.set_mode((self.win_width, self.win_height))
+        self.win = pygame.image.tostring(pygame.display.set_mode((self.win_width, self.win_height)), "RGBA")
 
         # Загрузка изображений персонажа
         self.character_x, self.character_y = self.win_width // 2, self.win_height // 2  # где встанет персонаж
@@ -62,14 +62,13 @@ class Game:
 
         # Установка параметров заднего плана
         self.bg_x, self.bg_y = 0, 0
-        bg_width, bg_height = background.get_size()
-        self.background = background
+        self.bg_width, self.bg_height = background.get_size()
 
         # Создание жуков
         self.bugs = [Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5))]
-        self.artifacts = [Artifact(randint(0, bg_width), randint(0, bg_height), 'Инфа.png'),
-                          Artifact(randint(0, bg_width), randint(0, bg_height), 'Инфа.png'),
-                          Artifact(randint(0, bg_width), randint(0, bg_height), 'Инфа.png')]
+        self.artifacts = [Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'Инфа.png'),
+                          Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'Инфа.png'),
+                          Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'Инфа.png')]
         self.armors = []
         self.weapons = []
 
@@ -77,8 +76,10 @@ class Game:
         # self.walls = [(x, y)]
         self.font = pygame.font.Font(None, 36)  # создаем объект шрифта
         self.bugs_count = 0
+        self.background = pygame.image.tostring(background, "RGBA")
 
     def game(self):
+        win = pygame.image.fromstring(self.win, (self.win_width, self.win_height), "RGBA")
         run = True
         start = time.time()
         while run:
@@ -90,7 +91,7 @@ class Game:
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     run = False
             if time.time() - start > 5:
-                self.bugs.append(Bug(randint(0, 800), randint(0, self.win_height), randint(1, 5)))
+                self.bugs.append(Bug(randint(0, 800), randint(0, win_height), randint(1, 5)))
                 start = time.time()
                 print("Bug")
             keys = pygame.key.get_pressed()
@@ -106,13 +107,14 @@ class Game:
                         bug.hp -= self.player.attack()
                         print("Персонаж бьет жука!")
 
-            self.win.fill((0, 0, 0))  # Заполняем окно черным цветом
-            self.win.blit(self.background, (self.bg_x, self.bg_y))  # Рисуем задний план
-            self.player.draw(self.win)  # Рисуем персонажа
+            win.fill((0, 0, 0))  # Заполняем окно черным цветом
+            win.blit(pygame.image.fromstring(self.background, (self.bg_width, self.bg_height), "RGBA"),
+                     (self.bg_x, self.bg_y))  # Рисуем задний план
+            self.player.draw(win)  # Рисуем персонажа
 
             for bug in self.bugs:
                 dist = bug.move_towards(self.character_x, self.character_y)
-                bug.draw(self.win)
+                bug.draw(win)
 
                 if dist < 50:
                     self.player.hp -= (1 * (1 / self.player.defence()))
@@ -131,7 +133,7 @@ class Game:
                                                    randint(1, 10)))
                     self.bugs.remove(bug)
 
-            prov_game_objects(self.artifacts, self.weapons, self.armors, self.win, self.character_x, self.character_y,
+            prov_game_objects(self.artifacts, self.weapons, self.armors, win, self.character_x, self.character_y,
                               self.player)
 
             hp_text = self.font.render(f"Здоровье: {self.player.hp}", True, (255, 255, 255))
@@ -152,8 +154,8 @@ class Game:
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         run = False
-            self.win.blit(hp_text, (20, 20))
-            self.win.blit(self.bugs_count_text, (750, 20))  # Отображаем здоровье персонажа
+            win.blit(hp_text, (20, 20))
+            win.blit(self.bugs_count_text, (750, 20))  # Отображаем здоровье персонажа
 
             pygame.display.update()  # Обновляем окно
 
@@ -162,18 +164,13 @@ class Game:
 
 
     def __getstate__(self):
+        print(self.__dict__.copy())
         state = self.__dict__.copy()
-
-        state["background"] = pygame.image.tostring(state["background"], "RGBA")
-        state["win"] = pygame.image.tostring(state["win"], "RGBA")
 
         return state
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self.background = pygame.image.fromstring(state["background"], "RGBA")
-        self.win = pygame.image.tostring(state["win"], "RGBA")
-
 
 
 
