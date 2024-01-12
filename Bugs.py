@@ -53,7 +53,7 @@ class Game:
         infoObject = pygame.display.Info()
         self.win_width, self.win_height = infoObject.current_w, infoObject.current_h
         # self.win_width, self.win_height = 1000, 1000
-        self.win = pygame.image.tostring(pygame.display.set_mode((self.win_width, self.win_height)), "RGBA")
+        self.win = pygame.display.set_mode((self.win_width, self.win_height))
 
         # Загрузка изображений персонажа
         self.character_x, self.character_y = self.win_width // 2, self.win_height // 2  # где встанет персонаж
@@ -74,16 +74,16 @@ class Game:
 
         x, y = 1, 1
         # self.walls = [(x, y)]
-        self.font = pygame.font.Font(None, 36)  # создаем объект шрифта
         self.bugs_count = 0
         self.background = pygame.image.tostring(background, "RGBA")
 
     def game(self):
-        win = pygame.image.fromstring(self.win, (self.win_width, self.win_height), "RGBA")
+        font = pygame.font.Font(None, 36)
         run = True
         start = time.time()
+        clock = pygame.time.Clock()
         while run:
-            pygame.time.delay(100)
+            clock.tick(100)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -107,14 +107,14 @@ class Game:
                         bug.hp -= self.player.attack()
                         print("Персонаж бьет жука!")
 
-            win.fill((0, 0, 0))  # Заполняем окно черным цветом
-            win.blit(pygame.image.fromstring(self.background, (self.bg_width, self.bg_height), "RGBA"),
+            self.win.fill((0, 0, 0))  # Заполняем окно черным цветом
+            self.win.blit(pygame.image.fromstring(self.background, (self.bg_width, self.bg_height), "RGBA"),
                      (self.bg_x, self.bg_y))  # Рисуем задний план
-            self.player.draw(win)  # Рисуем персонажа
+            self.player.draw(self.win)  # Рисуем персонажа
 
             for bug in self.bugs:
                 dist = bug.move_towards(self.character_x, self.character_y)
-                bug.draw(win)
+                bug.draw(self.win)
 
                 if dist < 50:
                     self.player.hp -= (1 * (1 / self.player.defence()))
@@ -133,14 +133,14 @@ class Game:
                                                    randint(1, 10)))
                     self.bugs.remove(bug)
 
-            prov_game_objects(self.artifacts, self.weapons, self.armors, win, self.character_x, self.character_y,
+            prov_game_objects(self.artifacts, self.weapons, self.armors, self.win, self.character_x, self.character_y,
                               self.player)
 
-            hp_text = self.font.render(f"Здоровье: {self.player.hp}", True, (255, 255, 255))
-            self.bugs_count_text = self.font.render(f"Количество убитых жуков: {self.bugs_count}, ЖИВОДЁР!", True,
+            hp_text = font.render(f"Здоровье: {self.player.hp}", True, (255, 255, 255))
+            bugs_count_text = font.render(f"Количество убитых жуков: {self.bugs_count}, ЖИВОДЁР!", True,
                                                     (255, 255, 255))
             if self.player.hp <= 0:
-                hp_text = self.font.render(f"Вы умерли", True, (255, 255, 255))
+                hp_text = font.render(f"Вы умерли", True, (255, 255, 255))
                 self.bugs = []
                 start = time.time() + 10 * 10
                 for event in pygame.event.get():
@@ -148,14 +148,14 @@ class Game:
                         run = False
 
             elif self.player.artifact == 3:
-                hp_text = self.font.render(f"Вы победили!", True, (255, 255, 255))
+                hp_text = font.render(f"Вы победили!", True, (255, 255, 255))
                 self.bugs = []
                 start = time.time() + 10 * 10
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         run = False
-            win.blit(hp_text, (20, 20))
-            win.blit(self.bugs_count_text, (750, 20))  # Отображаем здоровье персонажа
+            self.win.blit(hp_text, (20, 20))
+            self.win.blit(bugs_count_text, (750, 20))  # Отображаем здоровье персонажа
 
             pygame.display.update()  # Обновляем окно
 
@@ -164,13 +164,42 @@ class Game:
 
 
     def __getstate__(self):
-        print(self.__dict__.copy())
         state = self.__dict__.copy()
+        self.player.player_left = pygame.image.tostring(self.player.player_left, "RGBA")
+        self.player.player_right = ''
+        self.player.image = ''
+
+        '''self.player_left = pygame.image.load(
+            'персонаж облаченный зеленый.png')  # сам спрайт (изначально персонаж повернут влево)
+        # player_left = pygame.transform.scale(player_left, (win_width // 400 * 70, win_width // 400 * 100))
+        self.player_right = pygame.transform.flip(self.player_left, True, False)  # приколы с поворотом
+
+        self.image = self.player_left'''
+        a = self.__dict__
+        a['win'] = ''
+        a['background'] = ''
+        state['win'] = ''
+        bytes()
+        state['armors'] = []
+        state['weapons'] = []
+        state['bugs'] = []
+        state['artifacts'] = []
+
+        a['player'] = 0
+        a['armors'] = []
+        a['weapons'] = []
+        with open('test.txt', 'w+') as fp:
+            fp.write(str(a))
 
         return state
 
     def __setstate__(self, state):
         self.__dict__.update(state)
+        self.win = pygame.display.set_mode((self.win_width, self.win_height))
+        self.player.player_left = pygame.image.fromstring(self.player.player_left, (70, 100), "RGBA")
+        self.player.player_right = pygame.transform.flip(self.player.player_left, True, False)  # приколы с поворотом
+
+        self.player.image = self.player.player_left
 
 
 
@@ -180,10 +209,12 @@ if __name__ == "__main__":
     win_width, win_height = infoObject.current_w, infoObject.current_h
     # Загрузка изображения заднего плана
     background = pygame.image.load('задник.png')
-    background = pygame.transform.scale(background,
-                                        (win_width * 20, win_height * 20))  # новые размеры персонажа
+    #background = pygame.transform.scale(background,
+                                        #(win_width * 20, win_height * 20))  # новые размеры персонажа
 
     a = Game(background)
 
+    '''with open("savegame.dat", "rb") as fp:
+        a = pickle.load(fp)'''
 
     a.game()
