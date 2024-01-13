@@ -84,6 +84,7 @@ class Start_Window():
                         self.show_information()
                     if quit_button.button.collidepoint(mouse_pos):
                         pygame.quit()
+                        № ошибка для вставки сюда сохранялки
                         self.connection.close()
                         sys.exit()
 
