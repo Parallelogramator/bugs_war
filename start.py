@@ -1,14 +1,23 @@
+import pygame
+import pickle
+import time
+import threading
 import sqlite3
 import sys
 
-import pygame
+from Bugs import Game
 
 # Рисование текста
+
 def draw_text(surface, text, x, y, font=None, font_size=60, color=(255, 255, 255)):
     myFont = pygame.font.SysFont(font, font_size)
     new_text = myFont.render(text, 1, color)
     surface.blit(new_text, (x, y))
 
+def save(self):
+    self.background = pygame.image.tostring(self.background, "RGBA")
+    with open(f"{time.time()}.dat", "wb") as fp:
+        pickle.dump(self, fp)
 
 class Start_Window():
 
@@ -36,6 +45,12 @@ class Start_Window():
         self.input_name = False  # Напоминание вести имя игрока
         self.common_x = self.win_width // 2 - 250
         self.koef_y = self.win_height // 10
+        infoObject = pygame.display.Info()
+        win_width, win_height = infoObject.current_w, infoObject.current_h
+        # Загрузка изображения заднего плана
+        background = pygame.image.load('задник.png')
+        self.background = pygame.transform.scale(background,
+                                                 (win_width * 20, win_height * 20))  # новые размеры персонажа
 
         # Создание кнопок
         start_button = Button(screen, self.common_x, self.koef_y * 2)
@@ -126,16 +141,22 @@ class Start_Window():
         self.__init__(self.name_gamer)
     # Начать игру
     def start_game(self):
-        pass
-        '''background = pygame.image.load('задник.png')
-        background = pygame.transform.scale(background,
-                                (self.win_width * 20, self.win_height * 20))  # новые размеры персонажа
-        a = Game(background)
-        a.game()'''
+        self.game = Game(self.background)
+        self.game.game()
+        thread = threading.Thread(target=self.game.save)
+        thread.start()
 
     # Продолжить игру
     def continue_game(self):
-        pass
+        try:
+            self.game.game()
+
+        except Exception:
+            # нужно подтащить время из бд
+
+            with open(f"1705169049.7556996.dat", "rb") as fp:
+                self.game = pickle.load(fp)
+            self.game.game()
 
     # Показать статистику
     def show_statistics(self):
@@ -150,22 +171,11 @@ class Start_Window():
                                                              (self.name_gamer,)).fetchone()
         self.connection.commit()
 
-        # Отрисовываем объекты
-        statistics_screen.fill(((0, 0, 0)))
-        draw_text(statistics_screen, 'Статистика', self.common_x, self.koef_y, font_size=100)
-        draw_text(statistics_screen, f"Имя: {information_gamer[1]}", self.common_x, self.koef_y * 2)
-        draw_text(statistics_screen, f"Кол-во игр: {information_gamer[2]}", self.common_x, self.koef_y * 3)
-        draw_text(statistics_screen, f"Кол-во побед: {information_gamer[3]}", self.common_x, self.koef_y * 4)
-        draw_text(statistics_screen, f"Кол-во проигрышей: {information_gamer[5]}", self.common_x, self.koef_y * 5)
-        draw_text(statistics_screen, f"Кол-во убитых жуков: {information_gamer[5]}", self.common_x, self.koef_y * 6)
-        draw_text(statistics_screen, f"Кол-во жуков-помощников: {information_gamer[6]}", self.common_x, self.koef_y * 7)
-        draw_text(statistics_screen, f"Кол-во монет: {information_gamer[7]}", self.common_x, self.koef_y * 8)
-
-        # Кнопка "Назад"
         last = self.return_button(statistics_screen)
 
         # Основной цикл
         while True:
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.to_menu()
@@ -175,6 +185,21 @@ class Start_Window():
                     # Проверка нажатия кнопок
                     if last.button.collidepoint(mouse_pos):
                         self.to_menu()
+            # Отрисовываем объекты
+            statistics_screen.fill(((0, 0, 0)))
+            draw_text(statistics_screen, 'Статистика', self.common_x, self.koef_y, font_size=100)
+            draw_text(statistics_screen, f"Имя: {information_gamer[1]}", self.common_x, self.koef_y * 2)
+            draw_text(statistics_screen, f"Кол-во игр: {information_gamer[2]}", self.common_x, self.koef_y * 3)
+            draw_text(statistics_screen, f"Кол-во побед: {information_gamer[3]}", self.common_x, self.koef_y * 4)
+            draw_text(statistics_screen, f"Кол-во проигрышей: {information_gamer[5]}", self.common_x, self.koef_y * 5)
+            draw_text(statistics_screen, f"Кол-во убитых жуков: {information_gamer[5]}", self.common_x, self.koef_y * 6)
+            draw_text(statistics_screen, f"Кол-во жуков-помощников: {information_gamer[6]}", self.common_x,
+                      self.koef_y * 7)
+            draw_text(statistics_screen, f"Кол-во монет: {information_gamer[7]}", self.common_x, self.koef_y * 8)
+
+            # Кнопка "Назад"
+
+            pygame.display.update()  # Обновляем окно
 
     # Показать магазин
     def show_shop(self):
@@ -252,6 +277,10 @@ class Start_Window():
                     # Проверка нажатия кнопок
                     if last.button.collidepoint(mouse_pos):
                         self.to_menu()
+            # Отрисовываем объекты
+            draw_text(information_screen, text, self.common_x - 400, self.koef_y * 2)
+            draw_text(information_screen, 'Информация', self.common_x, self.koef_y, font_size=100)
+            pygame.display.update()  # Обновляем окно
 
 
 # Класс для создания кнопок
