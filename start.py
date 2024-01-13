@@ -1,19 +1,13 @@
 import pygame
 import pygame_menu
 import pickle
-import asyncio
 import time
+import threading
 
 from Bugs import Game
 
 
 # Экран + меню
-async def load(self, background, win_width, win_height):
-    a = (time.time())
-    self.background = pygame.image.tostring(pygame.transform.scale(background,
-                                                                   (win_width * 20, win_height * 20)),
-                                            "RGBA")  # новые размеры персонажа
-    print(time.time() - a)
 
 
 class Start_Window:
@@ -24,15 +18,8 @@ class Start_Window:
         win_width, win_height = infoObject.current_w, infoObject.current_h
         # Загрузка изображения заднего плана
         background = pygame.image.load('задник.png')
-        self.background = ''
-        '''
-        a = (time.time())
-        self.background = pygame.image.tostring(pygame.transform.scale(background,
-                                                                       (win_width * 20, win_height * 20)),
-                                                "RGBA")  # новые размеры персонажа
-        print(time.time() - a)'''
-        loop = asyncio.get_event_loop()
-        loop.create_task(load(self, background, win_width, win_height))
+        self.background = pygame.transform.scale(background,
+                                                 (win_width * 20, win_height * 20))  # новые размеры персонажа
 
         mytheme = pygame_menu.themes.Theme(title_bar_style=pygame_menu.widgets.MENUBAR_STYLE_UNDERLINE,
                                            background_color=(200, 255, 100, 100),
@@ -56,19 +43,20 @@ class Start_Window:
 
     def start_the_new_game(self):
         # начать игру
-        if self.background == '':
-            pygame.time.delay(20)
-            self.start_the_new_game()
-            return
         self.game = Game(self.background)
         self.game.game()
+        thread = threading.Thread(target=self.game.save)
+        thread.start()
+
 
     def start_the_game(self):
         try:
             self.game.game()
 
         except Exception:
-            with open("savegame.dat", "rb") as fp:
+            # нужно подтащить время из бд
+
+            with open(f"1705169049.7556996.dat", "rb") as fp:
                 self.game = pickle.load(fp)
             self.game.game()
 
@@ -80,6 +68,8 @@ class Start_Window:
         pass
 
 
+
 if __name__ == "__main__":
     Start_Window()
+
 

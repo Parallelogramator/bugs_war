@@ -2,6 +2,7 @@ import time
 from math import sqrt
 from random import randint
 import pickle
+import asyncio
 import pygame
 
 from move import Players, Bug
@@ -45,6 +46,11 @@ def prov_game_objects(artifacts, weapons, armors, win, character_x, character_y,
             armors.remove(armor)
 
 
+def save(self):
+    with open(f"{time.time()}.dat", "wb") as fp:
+        pickle.dump(self, fp)
+
+
 class Game:
     def __init__(self, background):
         pygame.init()
@@ -62,7 +68,7 @@ class Game:
 
         # Установка параметров заднего плана
         self.bg_x, self.bg_y = 0, 0
-        self.bg_width, self.bg_height = infoObject.current_w*20, infoObject.current_h*20
+        self.bg_width, self.bg_height = background.get_size()
 
         # Создание жуков
         self.bugs = [Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5))]
@@ -79,7 +85,6 @@ class Game:
 
     def game(self):
         font = pygame.font.Font(None, 36)
-        bg = pygame.image.fromstring(self.background, (self.bg_width, self.bg_height), "RGBA")
         run = True
         start = time.time()
         clock = pygame.time.Clock()
@@ -109,7 +114,7 @@ class Game:
                         print("Персонаж бьет жука!")
 
             self.win.fill((0, 0, 0))  # Заполняем окно черным цветом
-            self.win.blit(bg,
+            self.win.blit(self.background,
                      (self.bg_x, self.bg_y))  # Рисуем задний план
             self.player.draw(self.win)  # Рисуем персонажа
 
@@ -160,10 +165,17 @@ class Game:
 
             pygame.display.update()  # Обновляем окно
 
-        with open("savegame.dat", "wb") as fp:
+        print(type(self.background))
+        print(type(self.player.player_left ))
+
+    def save(self):
+        self.background = pygame.image.tostring(self.background, "RGBA")
+        with open(f"{time.time()}.dat", "wb") as fp:
             pickle.dump(self, fp)
 
+
     def __getstate__(self):
+        print("123")
         self.player.player_left = pygame.image.tostring(self.player.player_left, "RGBA")
         self.player.player_right = ''
         self.player.image = ''
@@ -182,7 +194,8 @@ class Game:
 
         state = self.__dict__.copy()
         state['win'] = ''
-        state['bugs'] = ''
+        state['background'] = self.background
+        state['bugs'] = bugs
         state['armors'] = []
         state['weapons'] = []
 
@@ -190,19 +203,22 @@ class Game:
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self.win = pygame.display.set_mode((self.win_width, self.win_height))
 
+        self.win = pygame.display.set_mode((self.win_width, self.win_height))
+        print(type(self.player.player_left))
         self.player.player_left = pygame.image.fromstring(self.player.player_left, (70, 100), "RGBA")
         self.player.player_right = pygame.transform.flip(self.player.player_left, True, False)  # приколы с поворотом
 
         self.player.image = self.player.player_left
         bugs = []
         for bug in self.bugs:
-            bugs.append(Bug(bug.x, bug.y, bug.speed))
+            bugs.append(Bug(bug[0], bug[1], bug[1]))
 
         self.bugs = bugs
         for artifacts in self.artifacts:
             artifacts.image = pygame.image.fromstring(artifacts.image, (30, 30), "RGBA")
+        print(type(self.background))
+        self.background = pygame.image.fromstring(self.background, (self.win_width * 20, self.win_height * 20), 'RGBA')
 
 
 if __name__ == "__main__":
@@ -211,9 +227,8 @@ if __name__ == "__main__":
     win_width, win_height = infoObject.current_w, infoObject.current_h
     # Загрузка изображения заднего плана
     background = pygame.image.load('задник.png')
-    background = pygame.image.tostring(pygame.transform.scale(background,
-                                                                   (win_width * 20, win_height * 20)),
-                                            "RGBA")  # новые размеры персонажа
+    #background = pygame.transform.scale(background,
+                                        #(win_width * 20, win_height * 20))  # новые размеры персонажа
 
     a = Game(background)
 
