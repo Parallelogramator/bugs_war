@@ -21,7 +21,7 @@ class Start_Window():
         self.win_width, self.win_height = infoObject.current_w, infoObject.current_h
 
         # Настройка окна
-        screen = pygame.display.set_mode((self.win_width, self.win_height))
+        screen = pygame.display.set_mode((self.win_width, self.win_height), pygame.FULLSCREEN)
         screen.fill((0, 0, 0))
         '''big_sky = pygame.image.load("sky.jpg")
         # масштабируем картинку под размер экрана
