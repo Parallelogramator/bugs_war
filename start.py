@@ -1,11 +1,19 @@
 import pygame
 import pygame_menu
 import pickle
+import asyncio
+import time
 
 from Bugs import Game
 
 
 # Экран + меню
+async def load(self, background, win_width, win_height):
+    a = (time.time())
+    self.background = pygame.image.tostring(pygame.transform.scale(background,
+                                                                   (win_width * 20, win_height * 20)),
+                                            "RGBA")  # новые размеры персонажа
+    print(time.time() - a)
 
 
 class Start_Window:
@@ -16,8 +24,15 @@ class Start_Window:
         win_width, win_height = infoObject.current_w, infoObject.current_h
         # Загрузка изображения заднего плана
         background = pygame.image.load('задник.png')
-        self.background = pygame.transform.scale(background,
-                                                 (win_width * 20, win_height * 20))  # новые размеры персонажа
+        self.background = ''
+        '''
+        a = (time.time())
+        self.background = pygame.image.tostring(pygame.transform.scale(background,
+                                                                       (win_width * 20, win_height * 20)),
+                                                "RGBA")  # новые размеры персонажа
+        print(time.time() - a)'''
+        loop = asyncio.get_event_loop()
+        loop.create_task(load(self, background, win_width, win_height))
 
         mytheme = pygame_menu.themes.Theme(title_bar_style=pygame_menu.widgets.MENUBAR_STYLE_UNDERLINE,
                                            background_color=(200, 255, 100, 100),
@@ -41,6 +56,10 @@ class Start_Window:
 
     def start_the_new_game(self):
         # начать игру
+        if self.background == '':
+            pygame.time.delay(20)
+            self.start_the_new_game()
+            return
         self.game = Game(self.background)
         self.game.game()
 

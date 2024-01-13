@@ -62,7 +62,7 @@ class Game:
 
         # Установка параметров заднего плана
         self.bg_x, self.bg_y = 0, 0
-        self.bg_width, self.bg_height = background.get_size()
+        self.bg_width, self.bg_height = infoObject.current_w*20, infoObject.current_h*20
 
         # Создание жуков
         self.bugs = [Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5))]
@@ -75,7 +75,7 @@ class Game:
         x, y = 1, 1
         # self.walls = [(x, y)]
         self.bugs_count = 0
-        self.background = pygame.image.tostring(background, "RGBA")
+        self.background = background
 
     def game(self):
         font = pygame.font.Font(None, 36)
@@ -163,16 +163,13 @@ class Game:
         with open("savegame.dat", "wb") as fp:
             pickle.dump(self, fp)
 
-
     def __getstate__(self):
-        state = self.__dict__.copy()
         self.player.player_left = pygame.image.tostring(self.player.player_left, "RGBA")
         self.player.player_right = ''
         self.player.image = ''
+        bugs = []
         for bug in self.bugs:
-            bug.bug_right = pygame.image.tostring(bug.bug_right, "RGBA")
-            bug.bug_left = ''
-            bug.image = ''
+            bugs.append((bug.x, bug.y, bug.speed))
         for artifacts in self.artifacts:
             artifacts.image = pygame.image.tostring(artifacts.image, "RGBA")
 
@@ -182,15 +179,12 @@ class Game:
         self.player_right = pygame.transform.flip(self.player_left, True, False)  # приколы с поворотом
 
         self.image = self.player_left'''
-        a = self.__dict__
-        a['win'] = ''
-        a['background'] = ''
+
+        state = self.__dict__.copy()
         state['win'] = ''
-        bytes()
+        state['bugs'] = ''
         state['armors'] = []
         state['weapons'] = []
-        with open('test.txt', 'w+') as fp:
-            fp.write(str(a))
 
         return state
 
@@ -202,11 +196,11 @@ class Game:
         self.player.player_right = pygame.transform.flip(self.player.player_left, True, False)  # приколы с поворотом
 
         self.player.image = self.player.player_left
+        bugs = []
         for bug in self.bugs:
-            bug.bug_right = pygame.image.fromstring(bug.bug_right, (50, 35), "RGBA")
-            bug.bug_left = pygame.transform.flip(bug.bug_right, True, False)
-            bug.image = bug.bug_right
+            bugs.append(Bug(bug.x, bug.y, bug.speed))
 
+        self.bugs = bugs
         for artifacts in self.artifacts:
             artifacts.image = pygame.image.fromstring(artifacts.image, (30, 30), "RGBA")
 
@@ -217,8 +211,9 @@ if __name__ == "__main__":
     win_width, win_height = infoObject.current_w, infoObject.current_h
     # Загрузка изображения заднего плана
     background = pygame.image.load('задник.png')
-    #background = pygame.transform.scale(background,
-                                        #(win_width * 20, win_height * 20))  # новые размеры персонажа
+    background = pygame.image.tostring(pygame.transform.scale(background,
+                                                                   (win_width * 20, win_height * 20)),
+                                            "RGBA")  # новые размеры персонажа
 
     a = Game(background)
 
