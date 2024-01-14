@@ -97,7 +97,7 @@ class Game:
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     run = False
             if time.time() - start > 5:
-                self.bugs.append(Bug(randint(0, 800), randint(0, self.win_height), randint(1, 5)))
+                self.bugs.append(Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5)))
                 start = time.time()
                 print("Bug")
             keys = pygame.key.get_pressed()
@@ -166,13 +166,7 @@ class Game:
             pygame.display.update()  # Обновляем окно
 
         print(type(self.background))
-        print(type(self.player.player_left ))
-
-    def save(self):
-        self.background = pygame.image.tostring(self.background, "RGBA")
-        with open(f"{time.time()}.dat", "wb") as fp:
-            pickle.dump(self, fp)
-
+        print(type(self.player.player_left))
 
     def __getstate__(self):
         print("123")
@@ -181,7 +175,7 @@ class Game:
         self.player.image = ''
         bugs = []
         for bug in self.bugs:
-            bugs.append((bug.x, bug.y, bug.speed))
+            bugs.append([bug.x, bug.y, bug.speed])
         for artifacts in self.artifacts:
             artifacts.image = pygame.image.tostring(artifacts.image, "RGBA")
 
@@ -195,7 +189,8 @@ class Game:
         state = self.__dict__.copy()
         state['win'] = ''
         state['background'] = self.background
-        state['bugs'] = bugs
+        state['bugy'] = bugs
+        state['bugs'] = []
         state['armors'] = []
         state['weapons'] = []
 
@@ -211,10 +206,10 @@ class Game:
 
         self.player.image = self.player.player_left
         bugs = []
-        for bug in self.bugs:
-            bugs.append(Bug(bug[0], bug[1], bug[1]))
+        for bug in self.bugy:
+            self.bugs.append(Bug(bug[0], bug[1], bug[2]))
 
-        self.bugs = bugs
+        #self.bugs = bugs
         for artifacts in self.artifacts:
             artifacts.image = pygame.image.fromstring(artifacts.image, (30, 30), "RGBA")
         print(type(self.background))
