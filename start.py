@@ -1,11 +1,12 @@
-import pygame
 import pickle
-import time
-import threading
 import sqlite3
 import sys
+import time
+
+import pygame
 
 from Bugs import Game
+
 
 # Рисование текста
 
@@ -14,16 +15,22 @@ def draw_text(surface, text, x, y, font=None, font_size=60, color=(255, 255, 255
     new_text = myFont.render(text, 1, color)
     surface.blit(new_text, (x, y))
 
-def save(self, time, user_id):
+
+def save(self, time, id_gamer):
     self.background = pygame.image.tostring(self.background, "RGBA")
-    вот тут надо вставить загрузку файла в бд
-    with open(f"data/{time}.dat", "wb") as fp:
+    # Вот загрузка файла в переменную path
+    id = self.connection.cursor().execute("""SELECT id_gamer FROM Gamer WHERE name_gamer=?""",
+                                          (self.name_gamer,)).fetchone()
+    file = self.connection.cursor().execute("""SELECT path FROM Game WHERE id_gamer=?""",
+                                            (id,)).fetchone()
+    with open(f"{time}.dat", "wb") as fp:
         pickle.dump(self, fp)
+
 
 class Start_Window():
 
     # Инициализация
-    def __init__(self, name_gamer=''):
+    def __init__(self, id_gamer=None):
         pygame.init()
 
         # Размеры окна
@@ -31,7 +38,7 @@ class Start_Window():
         self.win_width, self.win_height = infoObject.current_w, infoObject.current_h
 
         # Настройка окна
-        screen = pygame.display.set_mode((self.win_width, self.win_height), pygame.FULLSCREEN)
+        screen = pygame.display.set_mode((self.win_width, self.win_height))
         screen.fill((0, 0, 0))
         '''big_sky = pygame.image.load("sky.jpg")
         # масштабируем картинку под размер экрана
@@ -41,17 +48,25 @@ class Start_Window():
         # Подключение к базе данных
         self.connection = sqlite3.connect('bugs_war_database.sqlite')
 
-        # Переменные
-        self.name_gamer = name_gamer  # Имя игрока
-        self.input_name = False  # Напоминание вести имя игрока
-        self.common_x = self.win_width // 2 - 250
-        self.koef_y = self.win_height // 10
+        # Размеры окна
         infoObject = pygame.display.Info()
         win_width, win_height = infoObject.current_w, infoObject.current_h
+
         # Загрузка изображения заднего плана
         background = pygame.image.load('задник.png')
         self.background = pygame.transform.scale(background,
                                                  (win_width * 20, win_height * 20))  # новые размеры персонажа
+
+        # Переменные
+        self.game = Game(self.background)
+        self.id_gamer = id_gamer
+        try:
+            self.name_gamer = self.connection.cursor().execute("""SELECT name_gamer FROM Gamer WHERE id_gamer=?""", (self.id_gamer, )).fetchone()[0] # Имя игрока
+        except:
+            self.name_gamer = ''
+        self.input_name = False  # Напоминание вести имя игрока
+        self.common_x = self.win_width // 2 - 250
+        self.koef_y = self.win_height // 10
 
         # Создание кнопок
         start_button = Button(screen, self.common_x, self.koef_y * 2)
@@ -72,7 +87,7 @@ class Start_Window():
                     mouse_pos = pygame.mouse.get_pos()
 
                     # Проверка нажатия кнопок
-                    if self.check_name(): # Если введено имя
+                    if self.check_name():  # Если введено имя
                         if start_button.button.collidepoint(mouse_pos):
                             self.start_game()
                         if continue_button.button.collidepoint(mouse_pos):
@@ -84,16 +99,16 @@ class Start_Window():
                     if information_button.button.collidepoint(mouse_pos):
                         self.show_information()
                     if quit_button.button.collidepoint(mouse_pos):
-                        pygame.quit()
-                        save(self.game, time.time(), self.name_gamer)
+                        save(self.game, time.time(), self.id_gamer)
                         self.connection.close()
+                        pygame.quit()
                         sys.exit()
 
                 # Добавление имени
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_BACKSPACE:  # Удаление последнего символа
                         self.name_gamer = self.name_gamer[:-1]
-                    elif len(self.name_gamer) < 10: # Имя меньше 10 символов
+                    elif len(self.name_gamer) < 10:  # Имя меньше 10 символов
                         self.name_gamer += event.unicode
                     self.input_name = False
 
@@ -120,12 +135,14 @@ class Start_Window():
 
     # Проверка на имя
     def check_name(self):
+        print(self.id_gamer)
         if self.name_gamer != '':
             res = self.connection.cursor().execute("""SELECT name_gamer FROM Gamer""").fetchall()
-            if (self.name_gamer,) not in res: # Если имени нет в БД, добавляем
-                self.connection.cursor().execute(
-                    """INSERT INTO Gamer(name_gamer, count_games, count_win, count_fail, all_dead_bugs, count_assistants, count_coins) VALUES(?, ?, ?, ?, ?, ?, ?)""",
-                    (self.name_gamer, 0, 0, 0, 0, 0, 0))
+            print(self.name_gamer)
+            print(res)
+            if (self.name_gamer,) not in res:  # Если имени нет в БД, добавляем
+                self.connection.cursor().execute("""INSERT INTO Gamer(name_gamer) VALUES(?)""", (self.name_gamer, ))
+                self.id_gamer = self.connection.cursor().execute("""SELECT id_gamer FROM Gamer WHERE name_gamer=?""", (self.name_gamer, )).fetchone()[0]
                 self.connection.commit()
             return True
         self.input_name = True
@@ -139,27 +156,28 @@ class Start_Window():
 
     # Возвращение к меню
     def to_menu(self):
-        pygame.quit()
-        self.__init__(self.name_gamer)
+        self.__init__(self.id_gamer)
+
     # Начать игру
     def start_game(self):
-        self.game = Game(self.background)
-        это_в_бд = self.game.game()
+        self.game.game()
         '''
         thread = threading.Thread(target=self.game.save)
         thread.start()'''
 
     # Продолжить игру
     def continue_game(self):
+        # Нужна проверка на существование последней игры
         try:
             self.game.game()
-
         except Exception:
-             нужно подтащить файл пути из бд
-
+            # Подтащила время из БД
+            time = self.connection.cursor().execute("""SELECT time FROM Game WHERE id_gamer=?""",
+                                                             (self.id_gamer)).fetchone()
+            print(time)
             with open(f"1705232418.5041902.dat", "rb") as fp:
                 self.game = pickle.load(fp)
-            это_в_бд = self.game.game()
+            self.game.game()
 
     # Показать статистику
     def show_statistics(self):
@@ -170,8 +188,8 @@ class Start_Window():
         statistics_screen.fill(((0, 0, 0)))
 
         # Информация об игроке
-        information_gamer = self.connection.cursor().execute("""SELECT * FROM Gamer WHERE name_gamer=?""",
-                                                             (self.name_gamer,)).fetchone()
+        information_gamer = self.connection.cursor().execute("""SELECT * FROM Gamer WHERE id_gamer=?""",
+                                                             (self.id_gamer,)).fetchone()
         self.connection.commit()
 
         last = self.return_button(statistics_screen)
@@ -201,6 +219,7 @@ class Start_Window():
             draw_text(statistics_screen, f"Кол-во монет: {information_gamer[7]}", self.common_x, self.koef_y * 8)
 
             # Кнопка "Назад"
+            last.text_button('Назад')
 
             pygame.display.update()  # Обновляем окно
 
@@ -216,8 +235,8 @@ class Start_Window():
         last = self.return_button(shop_screen)
 
         # Информация об игроке
-        res = self.connection.cursor().execute("""SELECT count_assistants, count_coins FROM Gamer WHERE name_gamer=?""",
-                                               (self.name_gamer,)).fetchone()
+        res = self.connection.cursor().execute("""SELECT count_assistants, count_coins FROM Gamer WHERE id_gamer=?""",
+                                               (self.id_gamer,)).fetchone()
         self.connection.commit()
 
         # Кнопка "Купить"
@@ -235,9 +254,9 @@ class Start_Window():
                     if last.button.collidepoint(mouse_pos):
                         self.to_menu()
                     if buy.button.collidepoint(mouse_pos):
-                        if res[1] >= 20: # Если денег хватает
+                        if res[1] >= 20:  # Если денег хватает
                             self.connection.cursor().execute(f"""UPDATE SET count_assistants = {res[0] + 1} 
-                            SET count_coins = {res[1] - 20} FROM Gamer WHERE name_gamer=?""", (self.name_gamer,))
+                            SET count_coins = {res[1] - 20} FROM Gamer WHERE id_gamer=?""", (self.id_gamer,))
                             self.connection.commit()
                         else:
                             draw_text(shop_screen, 'Не хватает денег', self.common_x, self.koef_y * 8)
@@ -263,7 +282,7 @@ class Start_Window():
 
         # Информация из файла
         f = open('Information', encoding='UTF-8').readlines()
-        text = '/n'.join([j.strip() for j in f])
+        text = '\n'.join([j.strip() for j in f])
 
         # Отрисовываем объекты
         draw_text(information_screen, text, self.common_x - 400, self.koef_y * 2)
@@ -310,3 +329,4 @@ class Button:
 
 if __name__ == "__main__":
     Start_Window()
+
