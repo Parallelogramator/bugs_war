@@ -144,7 +144,7 @@ class Start_Window():
     # Начать игру
     def start_game(self):
         self.game = Game(self.background)
-        self.game.game()
+        это_в_бд = self.game.game()
         '''
         thread = threading.Thread(target=self.game.save)
         thread.start()'''
@@ -159,7 +159,7 @@ class Start_Window():
 
             with open(f"1705232418.5041902.dat", "rb") as fp:
                 self.game = pickle.load(fp)
-            self.game.game()
+            это_в_бд = self.game.game()
 
     # Показать статистику
     def show_statistics(self):
