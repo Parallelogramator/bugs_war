@@ -16,13 +16,10 @@ def draw_text(surface, text, x, y, font=None, font_size=60, color=(255, 255, 255
     surface.blit(new_text, (x, y))
 
 
-def save(self, time, id_gamer):
+def save(self, time, id_gamer, connection):
     self.background = pygame.image.tostring(self.background, "RGBA")
     # Вот загрузка файла в переменную path
-    id = self.connection.cursor().execute("""SELECT id_gamer FROM Gamer WHERE name_gamer=?""",
-                                          (self.name_gamer,)).fetchone()
-    file = self.connection.cursor().execute("""SELECT path FROM Game WHERE id_gamer=?""",
-                                            (id,)).fetchone()
+    file = connection.cursor().execute("""SELECT path FROM Game WHERE id_gamer=?""", (id_gamer,)).fetchone()
     with open(f"{time}.dat", "wb") as fp:
         pickle.dump(self, fp)
 
@@ -61,7 +58,8 @@ class Start_Window():
         self.game = Game(self.background)
         self.id_gamer = id_gamer
         try:
-            self.name_gamer = self.connection.cursor().execute("""SELECT name_gamer FROM Gamer WHERE id_gamer=?""", (self.id_gamer, )).fetchone()[0] # Имя игрока
+            self.name_gamer = self.connection.cursor().execute("""SELECT name_gamer FROM Gamer WHERE id_gamer=?""",
+                                                               (self.id_gamer,)).fetchone()[0]  # Имя игрока
         except:
             self.name_gamer = ''
         self.input_name = False  # Напоминание вести имя игрока
@@ -99,7 +97,7 @@ class Start_Window():
                     if information_button.button.collidepoint(mouse_pos):
                         self.show_information()
                     if quit_button.button.collidepoint(mouse_pos):
-                        save(self.game, time.time(), self.id_gamer)
+                        save(self.game, time.time(), self.id_gamer, self.connection)
                         self.connection.close()
                         pygame.quit()
                         sys.exit()
@@ -135,14 +133,12 @@ class Start_Window():
 
     # Проверка на имя
     def check_name(self):
-        print(self.id_gamer)
         if self.name_gamer != '':
             res = self.connection.cursor().execute("""SELECT name_gamer FROM Gamer""").fetchall()
-            print(self.name_gamer)
-            print(res)
             if (self.name_gamer,) not in res:  # Если имени нет в БД, добавляем
-                self.connection.cursor().execute("""INSERT INTO Gamer(name_gamer) VALUES(?)""", (self.name_gamer, ))
-                self.id_gamer = self.connection.cursor().execute("""SELECT id_gamer FROM Gamer WHERE name_gamer=?""", (self.name_gamer, )).fetchone()[0]
+                self.connection.cursor().execute("""INSERT INTO Gamer(name_gamer) VALUES(?)""", (self.name_gamer,))
+                self.id_gamer = self.connection.cursor().execute("""SELECT id_gamer FROM Gamer WHERE name_gamer=?""",
+                                                                 (self.name_gamer,)).fetchone()[0]
                 self.connection.commit()
             return True
         self.input_name = True
@@ -173,7 +169,7 @@ class Start_Window():
         except Exception:
             # Подтащила время из БД
             time = self.connection.cursor().execute("""SELECT time FROM Game WHERE id_gamer=?""",
-                                                             (self.id_gamer)).fetchone()
+                                                    (self.id_gamer)).fetchone()
             print(time)
             with open(f"1705232418.5041902.dat", "rb") as fp:
                 self.game = pickle.load(fp)
