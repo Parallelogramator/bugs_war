@@ -17,7 +17,7 @@ def draw_text(surface, text, x, y, font=None, font_size=60, color=(255, 255, 255
 def save(self, time, user_id):
     self.background = pygame.image.tostring(self.background, "RGBA")
     вот тут надо вставить загрузку файла в бд
-    with open(f"{time}.dat", "wb") as fp:
+    with open(f"data/{time}.dat", "wb") as fp:
         pickle.dump(self, fp)
 
 class Start_Window():
@@ -155,7 +155,7 @@ class Start_Window():
             self.game.game()
 
         except Exception:
-             нужно подтащить время из бд
+             нужно подтащить файл пути из бд
 
             with open(f"1705232418.5041902.dat", "rb") as fp:
                 self.game = pickle.load(fp)
