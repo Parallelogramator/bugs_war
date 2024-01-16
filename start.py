@@ -32,10 +32,10 @@ class Start_Window():
 
         # Размеры окна
         infoObject = pygame.display.Info()
-        self.win_width, self.win_height = infoObject.current_w, infoObject.current_h
+        win_width, win_height = infoObject.current_w, infoObject.current_h
 
         # Настройка окна
-        screen = pygame.display.set_mode((self.win_width, self.win_height))
+        screen = pygame.display.set_mode((win_width, win_height))
         screen.fill((0, 0, 0))
         '''big_sky = pygame.image.load("sky.jpg")
         # масштабируем картинку под размер экрана
@@ -44,10 +44,6 @@ class Start_Window():
 
         # Подключение к базе данных
         self.connection = sqlite3.connect('bugs_war_database.sqlite')
-
-        # Размеры окна
-        infoObject = pygame.display.Info()
-        win_width, win_height = infoObject.current_w, infoObject.current_h
 
         # Загрузка изображения заднего плана
         background = pygame.image.load('задник.png')
@@ -63,8 +59,8 @@ class Start_Window():
         except:
             self.name_gamer = ''
         self.input_name = False  # Напоминание вести имя игрока
-        self.common_x = self.win_width // 2 - 250
-        self.koef_y = self.win_height // 10
+        self.common_x = win_width // 2 - 250
+        self.koef_y = win_height // 10
 
         # Создание кнопок
         start_button = Button(screen, self.common_x, self.koef_y * 2)
@@ -325,4 +321,3 @@ class Button:
 
 if __name__ == "__main__":
     Start_Window()
-
