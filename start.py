@@ -32,10 +32,10 @@ class Start_Window():
 
         # Размеры окна
         infoObject = pygame.display.Info()
-        win_width, win_height = infoObject.current_w, infoObject.current_h
+        self.win_width, self.win_height = infoObject.current_w, infoObject.current_h
 
         # Настройка окна
-        screen = pygame.display.set_mode((win_width, win_height))
+        screen = pygame.display.set_mode((self.win_width, self.win_height))
         screen.fill((0, 0, 0))
         '''big_sky = pygame.image.load("sky.jpg")
         # масштабируем картинку под размер экрана
@@ -48,7 +48,7 @@ class Start_Window():
         # Загрузка изображения заднего плана
         background = pygame.image.load('задник.png')
         self.background = pygame.transform.scale(background,
-                                                 (win_width * 20, win_height * 20))  # новые размеры персонажа
+                                                 (self.win_width * 20, self.win_height * 20))  # новые размеры персонажа
 
         # Переменные
         self.game = Game(self.background)
@@ -59,8 +59,8 @@ class Start_Window():
         except:
             self.name_gamer = ''
         self.input_name = False  # Напоминание вести имя игрока
-        self.common_x = win_width // 2 - 250
-        self.koef_y = win_height // 10
+        self.common_x = self.win_width // 2 - 250
+        self.koef_y = self.win_height // 10
 
         # Создание кнопок
         start_button = Button(screen, self.common_x, self.koef_y * 2)
