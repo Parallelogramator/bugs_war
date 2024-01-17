@@ -20,7 +20,7 @@ def save(self, time, id_gamer, connection):
     self.background = pygame.image.tostring(self.background, "RGBA")
     # Вот загрузка файла в переменную path
     file = connection.cursor().execute("""SELECT path FROM Game WHERE id_gamer=?""", (id_gamer,)).fetchone()
-    with open(f"{time}.dat", "wb") as fp:
+    with open(f"data/{time}.dat", "wb") as fp:
         pickle.dump(self, fp)
 
 
@@ -152,6 +152,7 @@ class Start_Window():
 
     # Начать игру
     def start_game(self):
+        self.game = Game(self.background)
         self.game.game()
         '''
         thread = threading.Thread(target=self.game.save)
@@ -168,7 +169,7 @@ class Start_Window():
             # time = self.connection.cursor().execute("""SELECT time FROM Game WHERE id_gamer=?""",
             #                                       (self.id_gamer)).fetchone()
             # print(time)
-            with open(f"1705519814.5308828.dat", "rb") as fp:
+            with open(f"data/1705520572.2456079.dat", "rb") as fp:
                 self.game = pickle.load(fp)
             self.game.game()
 
