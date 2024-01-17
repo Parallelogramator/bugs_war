@@ -18,11 +18,24 @@ class Players:
         self.image = self.player_left
         self.hp = 100
 
+        self.all_weapon = []
+        self.all_weapon_sprites = pygame.sprite.Group()
+
         self.base_attack = 10
         self.current_weapon = 0
         self.artifact = 0
         self.weapon = [{'attack': 0, 'rang': 100}]
         self.armor = []
+        self.scale = 0
+
+        self.sprite = pygame.sprite.Sprite()
+        # определим его вид
+        self.sprite.image = self.image
+        self.sprite.rect = (50, 50, 50, 50)
+        # добавим спрайт в группу
+        self.all_weapon_sprites.add(self.sprite)
+
+        self.all_weapon.append(self.sprite)
 
     def move(self, keys, bg_x, bg_y):
         new_character_x = self.x
@@ -48,12 +61,12 @@ class Players:
             # то значение `new_character_y` увеличивается на `self.speed`.
 
         if keys[pygame.K_LSHIFT]:
-            self.speed = 100  # - Если клавиша `K_DOWN` нажата и `a` равно True,
+            self.speed = 50  # - Если клавиша `K_DOWN` нажата и `a` равно True,
             # То значение `self.speed` устанавливается равным 100.
             # В противном случае значение `self.speed` устанавливается равным 5.
 
         else:
-            self.speed = 5
+            self.speed = 10
 
             # Проверка, не выходит ли персонаж за пределы окна или не врезается ли он в стены
         prov_bg = True
@@ -116,12 +129,40 @@ class Players:
         print("Adding artifact")
 
     def add_weapon(self, char):
-        self.weapon.append(char)
+        self.sprite = pygame.sprite.Sprite()
+        # определим его вид
+        self.sprite.image = char.get('image')
+        # и размеры
+
+        if len(self.weapon) == 2:
+            self.sprite.rect = (50, 50+(51*(self.current_weapon)), 50, 50)
+            # добавим спрайт в группу
+            char.pop('image')
+            self.all_weapon_sprites.remove(self.all_weapon[self.current_weapon])
+            self.all_weapon[self.current_weapon] = self.sprite
+            self.all_weapon_sprites.add(self.sprite)
+            self.weapon[self.current_weapon] = char
+        else:
+            self.sprite.rect = (50, 101, 50, 50)
+            # добавим спрайт в группу
+            self.all_weapon_sprites.add(self.sprite)
+
+            self.all_weapon.append(self.sprite)
+
+            char.pop('image')
+            self.weapon.append(char)
         print("Adding weapon")
+
+    def change_weapon(self):
+        self.current_weapon = (self.current_weapon+1) % 2
 
     def add_armor(self, char):
         self.armor.append(char)
         print("Adding armor")
+
+    def add_scale(self):
+        self.scale += 1
+        print("Adding scale")
 
     def attack(self):
         return self.base_attack + self.weapon[self.current_weapon].get('attack')

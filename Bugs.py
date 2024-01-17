@@ -1,215 +1,259 @@
-import math
 import time
+from math import sqrt
 from random import randint
-
+import pickle
+import asyncio
 import pygame
 
-pygame.init()
-
-# Установка размеров окна
-infoObject = pygame.display.Info()
-win_width, win_height = infoObject.current_w, infoObject.current_h
-# win_width, win_height = 1000, 1000
-win = pygame.display.set_mode((win_width, win_height))
-
-# Загрузка изображений персонажа
-player_left = pygame.image.load('персонаж облаченный зеленый.png')  # сам спрайт (изночально персонаж повернут влево)
-# player_left = pygame.transform.scale(player_left, (win_width//400*70, win_width//400*100))  # новые размеры персонажа
-player_right = pygame.transform.flip(player_left, True, False)  # прриколы с поворотом
-player = player_right
-
-# Загрузка изображения заднего плана
-background = pygame.image.load('задник.png')
-background = pygame.transform.scale(background, (win_width * 20, win_height * 20))  # новые размеры персонажа
-
-character_x, character_y = win_width // 2, win_height // 2  # где встанет персонаж
-vel = 5  # хз, ща разберемся (может хп жука?)
-character_hp = 100  # количество хп (жизней/здоровья)
-
-# Установка параметров заднего плана
-bg_x, bg_y = 0, 0
-bg_width, bg_height = background.get_size()
+from move import Players, Bug
+from unmove import Artifact, Weapon, Armor, Scales
 
 
-class Bug:
-    def __init__(self, x, y, speed):
-        self.x = x
-        self.y = y
-        self.speed = speed
-        self.bugs_right = pygame.image.load('жуг.png')
-        self.bugs_left = pygame.transform.flip(self.bugs_right, True, False)
-        self.image = self.bugs_right
-        self.hp = 20
-
-    def move_towards(self, target_x, target_y):
-        dx = target_x - self.x
-        dy = target_y - self.y
-        dist = math.sqrt(dx ** 2 + dy ** 2)
-        dx /= dist
-        dy /= dist
-        new_x = self.x + dx * self.speed
-        if dx > 0:
-            self.image = self.bugs_left
-        else:
-            self.image = self.bugs_right
-        new_y = self.y + dy * self.speed
-
-        self.x = new_x
-        self.y = new_y
-        return dist
-
-    def draw(self, win):
-        win.blit(self.image, (self.x, self.y))
-
-    def pos_bg(self, vel_x, vel_y):
-        self.x += vel_x
-        self.y += vel_y
-
-
-def soxrany_i_pomilui(vel_x, vel_y):
+def soxrany_i_pomilui(vel_x, vel_y, bugs, artifacts, weapons, armors, scales):
     for bug in bugs:
         bug.pos_bg(vel_x, vel_y)
 
+    for artifact in artifacts:
+        artifact.pos_bg(vel_x, vel_y)
 
-# Создание жуков
-bugs = [Bug(randint(0, win_width), randint(0, win_height), randint(1, 5))]
-start = time.time()
-x, y = 1, 1
-wals = [(x, y)]
-font = pygame.font.Font(None, 36)  # создаем обьект шрифта
-bugs_count = 0
-vyhod = True  # выход из игры после проигрыша
-run = True
-while run:
-    pygame.time.delay(100)
+    for weapon in weapons:
+        weapon.pos_bg(vel_x, vel_y)
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            run = False
+    for armor in armors:
+        armor.pos_bg(vel_x, vel_y)
 
-    if time.time() - start > 5:
-        bugs.append(Bug(randint(0, win_width), randint(0, win_height), randint(1, 5)))
-        start = time.time()
-        print("Bug")
+    for scale in scales:
+        scale.pos_bg(vel_x, vel_y)
 
-    keys = pygame.key.get_pressed()
 
-    new_character_x = character_x
-    new_character_y = character_y
-
-    if keys[pygame.K_a] and vyhod:
-        new_character_x -= vel  # - Если клавиша `a` нажата и `a` равно True,
-        # то значение `new_character_x` уменьшается на `vel`.
-        # Затем переменные `player` и `position` присваиваются значение `player_right`.
-
-        player = player_right
-    if keys[pygame.K_d] and vyhod:
-        new_character_x += vel  # - Если клавиша `d` нажата и `a` равно True,
-        # то значение `new_character_x` увеличивается на `vel`.
-        # Затем переменные `player` и `position` присваиваются значение `player_left`.
-
-        player = player_left
-    if keys[pygame.K_w] and vyhod:
-        new_character_y -= vel  # - Если клавиша `w` нажата и `a` равно True,
-        # то значение `new_character_y` уменьшается на `vel`.
-
-    if keys[pygame.K_s] and vyhod:
-        new_character_y += vel  # - Если клавиша `K_s` нажата и `a` равно True,
-        # то значение `new_character_y` увеличивается на `vel`.
-
-    if keys[pygame.K_DOWN] and vyhod:
-        vel = 100  # - Если клавиша `K_DOWN` нажата и `a` равно True,
-        # то значение `vel` устанавливается равным 100.
-        # В противном случае, значение `vel` устанавливается равным 5.
-
-    else:
-        vel = 5
-
-    # Проверка, не выходит ли персонаж за пределы окна или не врезается ли он в стены
-    prov_bg = True
-    vel_bg_x = 0
-    vel_bg_y = 0
-    if not (200 <= new_character_y <= win_height - 200) and not (200 <= new_character_x <= win_width - 200):
-        if new_character_x > win_width - 200:
-            bg_x -= vel
-        else:
-            bg_x += vel
-        if new_character_y > win_height - 200:
-            bg_y -= vel
-            vel_bg_y = -vel
-        else:
-            bg_y += vel
-            vel_bg_y = vel
-
-        new_character_x = character_x
-        new_character_y = character_y
-
-        prov_bg = False
-
-    if not (200 <= new_character_x <= win_width - 200):
-        # Перемещение заднего плана, когда персонаж подходит к краю экрана
-        if new_character_x > win_width - 200:
-            bg_x -= vel
-            vel_bg_x = -vel
-        else:
-            bg_x += vel
-            vel_bg_x = vel
-
-        character_y = new_character_y
-
-        prov_bg = False
-
-    if not (200 <= new_character_y <= win_height - 200):
-        if new_character_y > win_height - 200:
-            bg_y -= vel
-            vel_bg_y = -vel
-        else:
-            bg_y += vel
-            vel_bg_y = vel
-
-        character_x = new_character_x
-
-        prov_bg = False
-
-    if prov_bg:
-        character_x = new_character_x
-        character_y = new_character_y
-
-    soxrany_i_pomilui(vel_bg_x, vel_bg_y)
-
-    if keys[pygame.K_SPACE]:  # Если нажата клавиша 'space', персонаж "бьет" жуков
-        for bug in bugs:
-            if math.sqrt((bug.x - character_x) ** 2 + (bug.y - character_y) ** 2) < 200:
-                bug.hp -= 10
-                print("Персонаж бьет жука!")
-
-    win.fill((0, 0, 0))  # Заполняем окно черным цветом
-    win.blit(background, (bg_x, bg_y))  # Рисуем задний план
-    win.blit(player, (character_x, character_y))  # Рисуем персонажа
-
-    for bug in bugs:
-        dist = bug.move_towards(character_x, character_y)
-        bug.draw(win)
+def prov_game_objects(scales, weapons, armors, win, character_x, character_y, player, key):
+    for scale in scales:
+        scale.draw(win)
+        dist = scale.dist(character_x, character_y)
         if dist < 50:
-            character_hp -= 1
-            print("Жук бьет персонажа!")
-        if bug.hp <= 0:
-            bugs_count += 1
-            bugs.remove(bug)
-            print("Жук убит!")
+            player.add_scale()
+            scales.remove(scale)
 
-    hp_text = font.render(f"Здоровье: {character_hp}", True, (255, 255, 255))
-    bugs_count_text = font.render(f"Количество убитых жуков: {bugs_count}, ЖИВОДЁР!", True, (255, 255, 255))
-    if character_hp <= 0:
-        hp_text = font.render(f"Вы умерли", True, (255, 255, 255))
+    for weapon in weapons:
+        weapon.draw(win)
+        dist = weapon.dist(character_x, character_y)
+        if dist < 50 and key[pygame.K_e]:
+            player.add_weapon(weapon.get_char())
+            weapons.remove(weapon)
+
+    for armor in armors:
+        armor.draw(win)
+        dist = armor.dist(character_x, character_y)
+        if dist < 50 and key[pygame.K_e]:
+            player.add_armor(armor.get_char())
+            armors.remove(armor)
+
+
+class Game:
+    def __init__(self, background):
+        pygame.init()
+
+        # Установка размеров окна
+        infoObject = pygame.display.Info()
+        self.win_width, self.win_height = infoObject.current_w, infoObject.current_h
+        # self.win_width, self.win_height = 1000, 1000
+        self.win = pygame.display.set_mode((self.win_width, self.win_height))
+
+        # Загрузка изображений персонажа
+        self.character_x, self.character_y = self.win_width // 2, self.win_height // 2  # где встанет персонаж
+
+        self.player = Players(self.character_x, self.character_y, self.win_width, self.win_height)
+
+        # Установка параметров заднего плана
+        self.bg_x, self.bg_y = 0, 0
+        self.bg_width, self.bg_height = background.get_size()
+
+        # Создание жуков
+        self.bugs = [Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5))]
+        self.artifacts = [Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'Инфа.png'),
+                          Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'Инфа.png'),
+                          Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'Инфа.png')]
+        self.armors = []
+        self.weapons = []
+        self.scales = []
+
+        x, y = 1, 1
+        # self.walls = [(x, y)]
+        self.bugs_count = 0
+        self.background = background
+
+    def game(self):
+        font = pygame.font.Font(None, 36)
+        run = True
+        start_bugs = time.time()
+        time_change = time.time()
+        clock = pygame.time.Clock()
+        while run:
+            clock.tick(24)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    run = False
+            if time.time() - start_bugs > 5:
+                self.bugs.append(Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5)))
+                start_bugs = time.time()
+                print("Bug")
+            keys = pygame.key.get_pressed()
+
+            if keys[pygame.K_c] and time.time() - time_change > 0.5:
+                print(1)
+                self.player.change_weapon()
+                time_change = time.time()
+
+            vel_bg_x, vel_bg_y, self.bg_x, self.bg_y = self.player.move(keys, self.bg_x, self.bg_y)
+
+            soxrany_i_pomilui(vel_bg_x, vel_bg_y, self.bugs, self.artifacts, self.weapons, self.armors, self.scales)
+            self.character_x, self.character_y = self.player.x, self.player.y
+
+            if keys[pygame.K_SPACE]:  # Если нажата клавиша 'space', персонаж "бьет" жуков
+                for bug in self.bugs:
+                    if sqrt((bug.x - self.character_x) ** 2 + (bug.y - self.character_y) ** 2) < self.player.rang():
+                        bug.hp -= self.player.attack()
+                        print("Персонаж бьет жука!")
+
+            self.win.fill((0, 0, 0))  # Заполняем окно черным цветом
+            self.win.blit(self.background,
+                     (self.bg_x, self.bg_y))  # Рисуем задний план
+            self.player.draw(self.win)  # Рисуем персонажа
+
+            for bug in self.bugs:
+                dist = bug.move_towards(self.character_x, self.character_y)
+                bug.draw(self.win)
+
+                if dist < 50:
+                    self.player.hp -= (1 * (1 / self.player.defence()))
+                    print("Жук бьет персонажа!")
+
+                if bug.hp <= 0:
+                    print("Жук убит!")
+                    self.bugs_count += 1
+                    if randint(0, self.bugs_count) in (2, 5, 7, 10, 16, 29, 42, 58, 71, 84, 88, 90, 100):
+                        self.scales.append(Scales(bug.x, bug.y,
+                                                 'Инфа.png'))
+
+
+
+                    if 1:
+                        self.weapons.append(Weapon(bug.x, bug.y,
+                                                   'Инфа.png', randint(100, 100),
+                                                   randint(100, 100)))
+
+                    self.bugs.remove(bug)
+
+            for artifact in self.artifacts:
+                artifact.draw(self.win)
+                dist = artifact.dist(self.character_x, self.character_y)
+                if dist < 50:
+                    self.player.add_artifact()
+                    self.artifacts.remove(artifact)
+
+            prov_game_objects(self.scales, self.weapons, self.armors, self.win, self.character_x, self.character_y, self.player, keys)
+
+            hp_text = font.render(f"Здоровье: {self.player.hp}", True, (255, 255, 255))
+            bugs_count_text = font.render(f"Количество убитых жуков: {self.bugs_count}, ЖИВОДЁР!", True,
+                                                    (255, 255, 255))
+            if self.player.hp <= 0:
+                hp_text = font.render(f"Вы умерли", True, (255, 255, 255))
+                self.bugs = []
+                start_bugs = time.time() + 10 * 10
+                for event in pygame.event.get():
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        run = False
+
+            elif self.player.artifact == 3:
+                hp_text = font.render(f"Вы победили!", True, (255, 255, 255))
+                self.bugs = []
+                start_bugs = time.time() + 10 * 10
+                for event in pygame.event.get():
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        run = False
+            self.win.blit(hp_text, (20, 20))
+            self.win.blit(bugs_count_text, (750, 20))  # Отображаем здоровье персонажа
+            mouse_pos = pygame.mouse.get_pos()
+            x = 50
+            self.player.all_weapon_sprites.draw(self.win)
+            for n, i in enumerate(self.player.weapon):
+                if n == self.player.current_weapon:
+                    pygame.draw.rect(self.win, (0, 0, 255), pygame.Rect(50, x, 50, 50), 1)
+
+                if pygame.Rect(50, x, 50, 50).collidepoint(mouse_pos):
+                    # Отображение характеристик оружия
+                    text = font.render(f'{i}', True, (0, 0, 0))
+                    self.win.blit(text, mouse_pos)
+                x += 51
+            pygame.display.update()  # Обновляем окно
+
+        print(type(self.background))
+        print(type(self.player.player_left))
+
+    def __getstate__(self):
+        print("123")
+        self.player.player_left = pygame.image.tostring(self.player.player_left, "RGBA")
+        self.player.player_right = ''
+        self.player.image = ''
         bugs = []
-        start = time.time() + 10 * 10
-        run = False
-    win.blit(hp_text, (20, 20))
-    win.blit(bugs_count_text, (750, 20))  # Отображаем здоровье персонажа
+        for bug in self.bugs:
+            bugs.append([bug.x, bug.y, bug.speed])
+        for artifacts in self.artifacts:
+            artifacts.image = pygame.image.tostring(artifacts.image, "RGBA")
 
-    pygame.display.update()  # Обновляем окно
+        '''self.player_left = pygame.image.load(
+            'персонаж облаченный зеленый.png')  # сам спрайт (изначально персонаж повернут влево)
+        # player_left = pygame.transform.scale(player_left, (win_width // 400 * 70, win_width // 400 * 100))
+        self.player_right = pygame.transform.flip(self.player_left, True, False)  # приколы с поворотом
 
-pygame.quit()
+        self.image = self.player_left'''
+
+        state = self.__dict__.copy()
+        state['win'] = ''
+        state['background'] = self.background
+        state['bugy'] = bugs
+        state['bugs'] = []
+        state['scales'] = []
+        state['armors'] = []
+        state['weapons'] = []
+
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
+        self.win = pygame.display.set_mode((self.win_width, self.win_height))
+        print(type(self.player.player_left))
+        self.player.player_left = pygame.image.fromstring(self.player.player_left, (70, 100), "RGBA")
+        self.player.player_right = pygame.transform.flip(self.player.player_left, True, False)  # приколы с поворотом
+
+        self.player.image = self.player.player_left
+        bugs = []
+        for bug in self.bugy:
+            self.bugs.append(Bug(bug[0], bug[1], bug[2]))
+
+        #self.bugs = bugs
+        for artifacts in self.artifacts:
+            artifacts.image = pygame.image.fromstring(artifacts.image, (30, 30), "RGBA")
+        print(type(self.background))
+        self.background = pygame.image.fromstring(self.background, (self.win_width * 20, self.win_height * 20), 'RGBA')
+
+
+if __name__ == "__main__":
+    pygame.init()
+    infoObject = pygame.display.Info()
+    win_width, win_height = infoObject.current_w, infoObject.current_h
+    # Загрузка изображения заднего плана
+    background = pygame.image.load('задник.png')
+    #background = pygame.transform.scale(background,
+                                        #(win_width * 20, win_height * 20))  # новые размеры персонажа
+
+    a = Game(background)
+
+    '''with open("savegame.dat", "rb") as fp:
+        a = pickle.load(fp)'''
+
+    a.game()
