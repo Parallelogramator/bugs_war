@@ -51,7 +51,6 @@ class Start_Window():
                                                  (self.win_width * 20, self.win_height * 20))  # новые размеры персонажа
 
         # Переменные
-        self.game = Game(self.background)
         self.id_gamer = id_gamer
         try:
             self.name_gamer = self.connection.cursor().execute("""SELECT name_gamer FROM Gamer WHERE id_gamer=?""",
@@ -93,9 +92,10 @@ class Start_Window():
                     if information_button.button.collidepoint(mouse_pos):
                         self.show_information()
                     if quit_button.button.collidepoint(mouse_pos):
+
+                        pygame.quit()
                         save(self.game, time.time(), self.id_gamer, self.connection)
                         self.connection.close()
-                        pygame.quit()
                         sys.exit()
 
                 # Добавление имени
@@ -162,12 +162,13 @@ class Start_Window():
         # Нужна проверка на существование последней игры
         try:
             self.game.game()
+            print(1)
         except Exception:
             # Подтащила время из БД
-            time = self.connection.cursor().execute("""SELECT time FROM Game WHERE id_gamer=?""",
-                                                    (self.id_gamer)).fetchone()
-            print(time)
-            with open(f"1705232418.5041902.dat", "rb") as fp:
+            # time = self.connection.cursor().execute("""SELECT time FROM Game WHERE id_gamer=?""",
+            #                                       (self.id_gamer)).fetchone()
+            # print(time)
+            with open(f"1705519814.5308828.dat", "rb") as fp:
                 self.game = pickle.load(fp)
             self.game.game()
 

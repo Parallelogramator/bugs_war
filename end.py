@@ -5,6 +5,7 @@ import pygame
 
 from start import draw_text, Button, Start_Window
 
+
 class End_Window:
 
     # Инициализация
@@ -80,6 +81,7 @@ class End_Window:
             draw_text(end_screen, f'Вероятность выпадания предметов: {ver}', self.common_x- 100, self.koef_y * 8)
             last_button.text_button('К главному меню')
             pygame.display.flip()
+
 
 if __name__ == "__main__":
     End_Window(0)

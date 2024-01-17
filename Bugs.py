@@ -198,6 +198,9 @@ class Game:
         self.player.player_left = pygame.image.tostring(self.player.player_left, "RGBA")
         self.player.player_right = ''
         self.player.image = ''
+        self.player.all_weapon_sprites = []
+        for i in self.player.all_weapon:
+            i.image = pygame.image.tostring(i.image, "RGBA")
         bugs = []
         for bug in self.bugs:
             bugs.append([bug.x, bug.y, bug.speed])
@@ -229,6 +232,11 @@ class Game:
         print(type(self.player.player_left))
         self.player.player_left = pygame.image.fromstring(self.player.player_left, (70, 100), "RGBA")
         self.player.player_right = pygame.transform.flip(self.player.player_left, True, False)  # приколы с поворотом
+
+        self.player.all_weapon_sprites = pygame.sprite.Group()
+        for i in self.player.all_weapon:
+            i.image = pygame.image.fromstring(i.image, (50, 50), "RGBA")
+            self.player.all_weapon_sprites.add(i)
 
         self.player.image = self.player.player_left
         bugs = []

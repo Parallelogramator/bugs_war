@@ -30,7 +30,7 @@ class Players:
 
         self.sprite = pygame.sprite.Sprite()
         # определим его вид
-        self.sprite.image = self.image
+        self.sprite.image = pygame.transform.scale(self.image, (50, 50))
         self.sprite.rect = (50, 50, 50, 50)
         # добавим спрайт в группу
         self.all_weapon_sprites.add(self.sprite)
