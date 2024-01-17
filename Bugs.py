@@ -6,10 +6,10 @@ import asyncio
 import pygame
 
 from move import Players, Bug
-from unmove import Artifact, Weapon, Armor
+from unmove import Artifact, Weapon, Armor, Scales
 
 
-def soxrany_i_pomilui(vel_x, vel_y, bugs, artifacts, weapons, armors):
+def soxrany_i_pomilui(vel_x, vel_y, bugs, artifacts, weapons, armors, scales):
     for bug in bugs:
         bug.pos_bg(vel_x, vel_y)
 
@@ -22,33 +22,31 @@ def soxrany_i_pomilui(vel_x, vel_y, bugs, artifacts, weapons, armors):
     for armor in armors:
         armor.pos_bg(vel_x, vel_y)
 
+    for scale in scales:
+        scale.pos_bg(vel_x, vel_y)
 
-def prov_game_objects(artifacts, weapons, armors, win, character_x, character_y, player):
-    for artifact in artifacts:
-        artifact.draw(win)
-        dist = artifact.dist(character_x, character_y)
+
+def prov_game_objects(scales, weapons, armors, win, character_x, character_y, player, key):
+    for scale in scales:
+        scale.draw(win)
+        dist = scale.dist(character_x, character_y)
         if dist < 50:
-            player.add_artifact()
-            artifacts.remove(artifact)
+            player.add_scale()
+            scales.remove(scale)
 
     for weapon in weapons:
         weapon.draw(win)
         dist = weapon.dist(character_x, character_y)
-        if dist < 50:
+        if dist < 50 and key[pygame.K_e]:
             player.add_weapon(weapon.get_char())
             weapons.remove(weapon)
 
     for armor in armors:
         armor.draw(win)
         dist = armor.dist(character_x, character_y)
-        if dist < 50:
+        if dist < 50 and key[pygame.K_e]:
             player.add_armor(armor.get_char())
             armors.remove(armor)
-
-
-def save(self):
-    with open(f"{time.time()}.dat", "wb") as fp:
-        pickle.dump(self, fp)
 
 
 class Game:
@@ -77,6 +75,7 @@ class Game:
                           Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'Инфа.png')]
         self.armors = []
         self.weapons = []
+        self.scales = []
 
         x, y = 1, 1
         # self.walls = [(x, y)]
@@ -86,25 +85,31 @@ class Game:
     def game(self):
         font = pygame.font.Font(None, 36)
         run = True
-        start = time.time()
+        start_bugs = time.time()
+        time_change = time.time()
         clock = pygame.time.Clock()
         while run:
-            clock.tick(60)
+            clock.tick(24)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     run = False
-            if time.time() - start > 5:
+            if time.time() - start_bugs > 5:
                 self.bugs.append(Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5)))
-                start = time.time()
+                start_bugs = time.time()
                 print("Bug")
             keys = pygame.key.get_pressed()
 
+            if keys[pygame.K_c] and time.time() - time_change > 0.5:
+                print(1)
+                self.player.change_weapon()
+                time_change = time.time()
+
             vel_bg_x, vel_bg_y, self.bg_x, self.bg_y = self.player.move(keys, self.bg_x, self.bg_y)
 
-            soxrany_i_pomilui(vel_bg_x, vel_bg_y, self.bugs, self.artifacts, self.weapons, self.armors)
+            soxrany_i_pomilui(vel_bg_x, vel_bg_y, self.bugs, self.artifacts, self.weapons, self.armors, self.scales)
             self.character_x, self.character_y = self.player.x, self.player.y
 
             if keys[pygame.K_SPACE]:  # Если нажата клавиша 'space', персонаж "бьет" жуков
@@ -129,18 +134,27 @@ class Game:
                 if bug.hp <= 0:
                     print("Жук убит!")
                     self.bugs_count += 1
-                    if randint(0, self.bugs_count) == 5:
-                        self.armors.append(Armor(bug.x, bug.y,
-                                                 'Инфа.png', randint(1, 10),
-                                                 randint(1, 10)))
-                    if randint(0, self.bugs_count) == 7:
+                    if randint(0, self.bugs_count) in (2, 5, 7, 10, 16, 29, 42, 58, 71, 84, 88, 90, 100):
+                        self.scales.append(Scales(bug.x, bug.y,
+                                                 'Инфа.png'))
+
+
+
+                    if 1:
                         self.weapons.append(Weapon(bug.x, bug.y,
-                                                   'Инфа.png', randint(1, 10),
-                                                   randint(1, 10)))
+                                                   'Инфа.png', randint(100, 100),
+                                                   randint(100, 100)))
+
                     self.bugs.remove(bug)
 
-            prov_game_objects(self.artifacts, self.weapons, self.armors, self.win, self.character_x, self.character_y,
-                              self.player)
+            for artifact in self.artifacts:
+                artifact.draw(self.win)
+                dist = artifact.dist(self.character_x, self.character_y)
+                if dist < 50:
+                    self.player.add_artifact()
+                    self.artifacts.remove(artifact)
+
+            prov_game_objects(self.scales, self.weapons, self.armors, self.win, self.character_x, self.character_y, self.player, keys)
 
             hp_text = font.render(f"Здоровье: {self.player.hp}", True, (255, 255, 255))
             bugs_count_text = font.render(f"Количество убитых жуков: {self.bugs_count}, ЖИВОДЁР!", True,
@@ -148,7 +162,7 @@ class Game:
             if self.player.hp <= 0:
                 hp_text = font.render(f"Вы умерли", True, (255, 255, 255))
                 self.bugs = []
-                start = time.time() + 10 * 10
+                start_bugs = time.time() + 10 * 10
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         run = False
@@ -156,13 +170,24 @@ class Game:
             elif self.player.artifact == 3:
                 hp_text = font.render(f"Вы победили!", True, (255, 255, 255))
                 self.bugs = []
-                start = time.time() + 10 * 10
+                start_bugs = time.time() + 10 * 10
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         run = False
             self.win.blit(hp_text, (20, 20))
             self.win.blit(bugs_count_text, (750, 20))  # Отображаем здоровье персонажа
+            mouse_pos = pygame.mouse.get_pos()
+            x = 50
+            self.player.all_weapon_sprites.draw(self.win)
+            for n, i in enumerate(self.player.weapon):
+                if n == self.player.current_weapon:
+                    pygame.draw.rect(self.win, (0, 0, 255), pygame.Rect(50, x, 50, 50), 1)
 
+                if pygame.Rect(50, x, 50, 50).collidepoint(mouse_pos):
+                    # Отображение характеристик оружия
+                    text = font.render(f'{i}', True, (0, 0, 0))
+                    self.win.blit(text, mouse_pos)
+                x += 51
             pygame.display.update()  # Обновляем окно
 
         print(type(self.background))
@@ -191,6 +216,7 @@ class Game:
         state['background'] = self.background
         state['bugy'] = bugs
         state['bugs'] = []
+        state['scales'] = []
         state['armors'] = []
         state['weapons'] = []
 
