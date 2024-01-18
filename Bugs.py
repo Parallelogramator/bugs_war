@@ -38,8 +38,14 @@ def prov_game_objects(scales, weapons, armors, win, character_x, character_y, pl
         weapon.draw(win)
         dist = weapon.dist(character_x, character_y)
         if dist < 50 and key[pygame.K_e]:
-            player.add_weapon(weapon.get_char())
+            a = player.add_weapon(weapon.get_char())
             weapons.remove(weapon)
+            if a:
+                weapons.append(Weapon(character_x, character_y,
+                                           'меч_1.png', randint(100, 100),
+                                           randint(100, 100)))
+                weapons[-1].image = a
+            break
 
     for armor in armors:
         armor.draw(win)
@@ -142,7 +148,7 @@ class Game:
 
                     if 1:
                         self.weapons.append(Weapon(bug.x, bug.y,
-                                                   'Инфа.png', randint(100, 100),
+                                                   'меч_1.png', randint(100, 100),
                                                    randint(100, 100)))
 
                     self.bugs.remove(bug)

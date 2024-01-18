@@ -1,5 +1,6 @@
 import pygame
 from math import sqrt
+from unmove import Weapon
 
 
 class Players:
@@ -133,13 +134,16 @@ class Players:
         # определим его вид
         self.sprite.image = char.get('image')
         # и размеры
+        a = False
 
         if len(self.weapon) == 2:
             self.sprite.rect = (50, 50+(51*(self.current_weapon)), 50, 50)
             # добавим спрайт в группу
             char.pop('image')
             self.all_weapon_sprites.remove(self.all_weapon[self.current_weapon])
+            a = self.all_weapon[self.current_weapon].image
             self.all_weapon[self.current_weapon] = self.sprite
+            print(dir(self.sprite.image))
             self.all_weapon_sprites.add(self.sprite)
             self.weapon[self.current_weapon] = char
         else:
@@ -152,6 +156,7 @@ class Players:
             char.pop('image')
             self.weapon.append(char)
         print("Adding weapon")
+        return a
 
     def change_weapon(self):
         self.current_weapon = (self.current_weapon+1) % 2
