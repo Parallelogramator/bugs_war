@@ -98,7 +98,8 @@ class Start_Window():
 
                     if self.quit_button.button.collidepoint(mouse_pos):
                         pygame.quit()
-                        save(self.game, time.time(), self.id_gamer, self.connection)
+                        if self.game:
+                            save(self.game, self.id_gamer, self.connection)
                         self.connection.close()
                         sys.exit()
 
