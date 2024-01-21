@@ -203,7 +203,7 @@ class Game:
 
         print(type(self.background))
         print(type(self.player.player_left))
-        return {'win': res, 'time': self.time, 'bugs': self.bugs_count, 'live': 1}
+        return {'win': res, 'time': self.time, 'bugs': self.bugs_count, 'live': 1, 'scale': self.player.scale}
 
     def __getstate__(self):
         print("123")
