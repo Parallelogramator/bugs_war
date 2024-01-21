@@ -93,6 +93,7 @@ class Game:
         self.time = time.time()
 
     def game(self):
+        live = 1
         res = None
         font = pygame.font.Font(None, 36)
         run = True
@@ -170,6 +171,7 @@ class Game:
                                                     (255, 255, 255))
             if self.player.hp <= 0:
                 hp_text = font.render(f"Вы умерли", True, (255, 255, 255))
+                live = 0
                 res = False
                 self.bugs = []
                 start_bugs = time.time() + 10 * 10
@@ -203,7 +205,7 @@ class Game:
 
         print(type(self.background))
         print(type(self.player.player_left))
-        return {'win': res, 'time': self.time, 'bugs': self.bugs_count, 'live': 1, 'scale': self.player.scale}
+        return {'win': res, 'time': self.time, 'bugs': self.bugs_count, 'live': live, 'scale': self.player.scale}
 
     def __getstate__(self):
         print("123")
