@@ -50,8 +50,7 @@ class Start_Window():
         self.background = pygame.transform.scale(background,
                                                  (self.win_width * 20, self.win_height * 20))  # новые размеры персонажа
 
-        # Переменные
-        self.game = Game(self.background)
+
         self.id_gamer = id_gamer
         try:
             self.name_gamer = self.connection.cursor().execute("""SELECT name_gamer FROM Gamer WHERE id_gamer=?""",
@@ -152,6 +151,8 @@ class Start_Window():
 
     # Начать игру
     def start_game(self):
+        # Переменные
+        self.game = Game(self.background)
         self.game.game()
         '''
         thread = threading.Thread(target=self.game.save)
