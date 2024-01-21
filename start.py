@@ -16,11 +16,11 @@ def draw_text(surface, text, x, y, font=None, font_size=60, color=(255, 255, 255
     surface.blit(new_text, (x, y))
 
 
-def save(self, time, id_gamer, connection):
+def save(self, id_gamer, connection):
     self.background = pygame.image.tostring(self.background, "RGBA")
-    # Вот загрузка файла в переменную path
+    вот тут надо вставить сохранение по id игры
     file = connection.cursor().execute("""SELECT path FROM Game WHERE id_gamer=?""", (id_gamer,)).fetchone()
-    with open(f"{time}.dat", "wb") as fp:
+    with open(f"data/{file}.dat", "wb") as fp:
         pickle.dump(self, fp)
 
 
@@ -51,7 +51,6 @@ class Start_Window():
                                                  (self.win_width * 20, self.win_height * 20))  # новые размеры персонажа
 
         # Переменные
-        self.game = Game(self.background)
         self.id_gamer = id_gamer
         try:
             self.name_gamer = self.connection.cursor().execute("""SELECT name_gamer FROM Gamer WHERE id_gamer=?""",
@@ -96,10 +95,11 @@ class Start_Window():
                             self.show_shop()
                     if self.information_button.button.collidepoint(mouse_pos):
                         self.show_information()
+
                     if self.quit_button.button.collidepoint(mouse_pos):
+                        pygame.quit()
                         save(self.game, time.time(), self.id_gamer, self.connection)
                         self.connection.close()
-                        pygame.quit()
                         sys.exit()
 
                 # Добавление имени
@@ -157,6 +157,7 @@ class Start_Window():
 
     # Начать игру
     def start_game(self):
+        self.game = Game(self.background, 0)
         self.game.game()
         '''
         thread = threading.Thread(target=self.game.save)
@@ -167,13 +168,18 @@ class Start_Window():
         # Нужна проверка на существование последней игры
         try:
             self.game.game()
+            print(1)
         except Exception:
             # Подтащила время из БД
-            time = self.connection.cursor().execute("""SELECT time FROM Game WHERE id_gamer=?""",
-                                                    (self.id_gamer)).fetchone()
-            print(time)
-            with open(f"1705232418.5041902.dat", "rb") as fp:
-                self.game = pickle.load(fp)
+            резулт это уровень игры, время замени на id игры
+            id, result = self.connection.cursor().execute("""SELECT time, result FROM Game WHERE id_gamer=?""",
+                                                   (self.id_gamer)).fetchone()
+
+            if result is not None:
+                self.game = Game(self.background, result+1)
+            else:
+                with open(f"data/{id}.dat", "rb") as fp:
+                    self.game = pickle.load(fp)
             self.game.game()
 
     # Показать статистику

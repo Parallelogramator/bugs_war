@@ -38,8 +38,14 @@ def prov_game_objects(scales, weapons, armors, win, character_x, character_y, pl
         weapon.draw(win)
         dist = weapon.dist(character_x, character_y)
         if dist < 50 and key[pygame.K_e]:
-            player.add_weapon(weapon.get_char())
+            a = player.add_weapon(weapon.get_char())
             weapons.remove(weapon)
+            if a:
+                weapons.append(Weapon(character_x, character_y,
+                                           randint(0, 1), randint(100, 100),
+                                           randint(100, 100)))
+                weapons[-1].image = a
+            break
 
     for armor in armors:
         armor.draw(win)
@@ -50,8 +56,10 @@ def prov_game_objects(scales, weapons, armors, win, character_x, character_y, pl
 
 
 class Game:
-    def __init__(self, background):
+    def __init__(self, background, level):
         pygame.init()
+
+        self.level = level
 
         # Установка размеров окна
         infoObject = pygame.display.Info()
@@ -69,7 +77,7 @@ class Game:
         self.bg_width, self.bg_height = background.get_size()
 
         # Создание жуков
-        self.bugs = [Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5))]
+        self.bugs = [Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5), self.level)]
         self.artifacts = [Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'Инфа.png'),
                           Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'Инфа.png'),
                           Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'Инфа.png')]
@@ -82,7 +90,10 @@ class Game:
         self.bugs_count = 0
         self.background = background
 
+        self.time = time.time()
+
     def game(self):
+        res = None
         font = pygame.font.Font(None, 36)
         run = True
         start_bugs = time.time()
@@ -97,7 +108,7 @@ class Game:
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     run = False
             if time.time() - start_bugs > 5:
-                self.bugs.append(Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5)))
+                self.bugs.append(Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5), self.level))
                 start_bugs = time.time()
                 print("Bug")
             keys = pygame.key.get_pressed()
@@ -138,11 +149,9 @@ class Game:
                         self.scales.append(Scales(bug.x, bug.y,
                                                  'Инфа.png'))
 
-
-
                     if 1:
                         self.weapons.append(Weapon(bug.x, bug.y,
-                                                   'Инфа.png', randint(100, 100),
+                                                   randint(0, 1), randint(100, 100),
                                                    randint(100, 100)))
 
                     self.bugs.remove(bug)
@@ -161,6 +170,7 @@ class Game:
                                                     (255, 255, 255))
             if self.player.hp <= 0:
                 hp_text = font.render(f"Вы умерли", True, (255, 255, 255))
+                res = False
                 self.bugs = []
                 start_bugs = time.time() + 10 * 10
                 for event in pygame.event.get():
@@ -169,6 +179,7 @@ class Game:
 
             elif self.player.artifact == 3:
                 hp_text = font.render(f"Вы победили!", True, (255, 255, 255))
+                res = self.level
                 self.bugs = []
                 start_bugs = time.time() + 10 * 10
                 for event in pygame.event.get():
@@ -192,12 +203,18 @@ class Game:
 
         print(type(self.background))
         print(type(self.player.player_left))
+        return {'win': res, 'time': self.time, 'bugs': self.bugs_count, 'live': 1}
 
     def __getstate__(self):
         print("123")
         self.player.player_left = pygame.image.tostring(self.player.player_left, "RGBA")
         self.player.player_right = ''
         self.player.image = ''
+        self.player.all_weapon_sprites = []
+        for i in self.player.all_weapon:
+            i.image = pygame.image.tostring(i.image, "RGBA")
+
+        print(type(self.background))
         bugs = []
         for bug in self.bugs:
             bugs.append([bug.x, bug.y, bug.speed])
@@ -214,6 +231,8 @@ class Game:
         state = self.__dict__.copy()
         state['win'] = ''
         state['background'] = self.background
+        print(type(state['background']))
+        print(type( self.background))
         state['bugy'] = bugs
         state['bugs'] = []
         state['scales'] = []
@@ -230,10 +249,15 @@ class Game:
         self.player.player_left = pygame.image.fromstring(self.player.player_left, (70, 100), "RGBA")
         self.player.player_right = pygame.transform.flip(self.player.player_left, True, False)  # приколы с поворотом
 
+        self.player.all_weapon_sprites = pygame.sprite.Group()
+        for i in self.player.all_weapon:
+            i.image = pygame.image.fromstring(i.image, (50, 50), "RGBA")
+            self.player.all_weapon_sprites.add(i)
+
         self.player.image = self.player.player_left
         bugs = []
         for bug in self.bugy:
-            self.bugs.append(Bug(bug[0], bug[1], bug[2]))
+            self.bugs.append(Bug(bug[0], bug[1], bug[2], self.level))
 
         #self.bugs = bugs
         for artifacts in self.artifacts:
