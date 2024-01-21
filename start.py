@@ -152,7 +152,7 @@ class Start_Window():
 
     # Начать игру
     def start_game(self):
-        self.game = Game(self.background)
+        self.game = Game(self.background, 0)
         self.game.game()
         '''
         thread = threading.Thread(target=self.game.save)
@@ -166,11 +166,14 @@ class Start_Window():
             print(1)
         except Exception:
             # Подтащила время из БД
-            # time = self.connection.cursor().execute("""SELECT time FROM Game WHERE id_gamer=?""",
-            #                                       (self.id_gamer)).fetchone()
-            # print(time)
-            with open(f"data/1705520572.2456079.dat", "rb") as fp:
-                self.game = pickle.load(fp)
+            time, result = self.connection.cursor().execute("""SELECT time, result FROM Game WHERE id_gamer=?""",
+                                                   (self.id_gamer)).fetchone()
+
+            if result is not None:
+                self.game = Game(self.background, result+1)
+            else:
+                with open(f"data/1705520572.2456079.dat", "rb") as fp:
+                    self.game = pickle.load(fp)
             self.game.game()
 
     # Показать статистику

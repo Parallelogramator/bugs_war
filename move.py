@@ -184,11 +184,11 @@ class Players:
 
 
 class Bug:
-    def __init__(self, x, y, speed):
+    def __init__(self, x, y, speed, level):
         self.x = x
         self.y = y
         self.speed = speed
-        self.bug_right = pygame.image.load('жуг.png')
+        self.bug_right = pygame.image.load(bugs_image[level])
         self.bug_left = pygame.transform.flip(self.bug_right, True, False)
         self.image = self.bug_right
         self.hp = 20
@@ -216,3 +216,6 @@ class Bug:
     def pos_bg(self, vel_x, vel_y):
         self.x += vel_x
         self.y += vel_y
+
+
+bugs_image = ['жуг.png', 'жук_фиолетовый.png']
