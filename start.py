@@ -18,7 +18,7 @@ def draw_text(surface, text, x, y, font=None, font_size=60, color=(255, 255, 255
 
 def save(self, id_gamer, connection):
     self.background = pygame.image.tostring(self.background, "RGBA")
-    вот тут надо вставить сохранение по id игры
+    '''в от тут надо вставить сохранение по id игры'''
     file = connection.cursor().execute("""SELECT path FROM Game WHERE id_gamer=?""", (id_gamer,)).fetchone()
     with open(f"data/{file}.dat", "wb") as fp:
         pickle.dump(self, fp)
@@ -141,9 +141,9 @@ class Start_Window():
             res = self.connection.cursor().execute("""SELECT name_gamer FROM Gamer""").fetchall()
             if (self.name_gamer,) not in res:  # Если имени нет в БД, добавляем
                 self.connection.cursor().execute("""INSERT INTO Gamer(name_gamer) VALUES(?)""", (self.name_gamer,))
-                self.id_gamer = self.connection.cursor().execute("""SELECT id_gamer FROM Gamer WHERE name_gamer=?""",
+            self.id_gamer = self.connection.cursor().execute("""SELECT id_gamer FROM Gamer WHERE name_gamer=?""",
                                                                  (self.name_gamer,)).fetchone()[0]
-                self.connection.commit()
+            self.connection.commit()
             return True
         self.input_name = True
         return False
@@ -161,20 +161,64 @@ class Start_Window():
     # Начать игру
     def start_game(self):
         self.game = Game(self.background, 0)
-        self.game.game()
+        to_end = self.game.game()
+        if to_end['win'] == 3 or to_end['win'] == 0:
+            self.end_window(to_end)
+
         '''
         thread = threading.Thread(target=self.game.save)
         thread.start()'''
 
+    def end_window(self, results):
+        # Настройка окна
+        end_screen = pygame.display.set_mode((self.win_width, self.win_height), pygame.FULLSCREEN)
+        end_screen.fill((0, 0, 0))
+        '''big_sky = pygame.image.load("sky.jpg")
+        # масштабируем картинку под размер экрана
+        sky = scale(big_sky, ((win_width, win_height))'''
+        pygame.display.set_caption("Война жуков")
+        last_button = self.return_button(end_screen)
+        if results['win'] == 3:
+            win_or_fail = 'Победа'
+        else:
+            win_or_fail = 'Поражение'
+        # Основной цикл
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    self.connection.close()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+
+                    # Проверка нажатия кнопок
+                    if last_button.button.collidepoint(mouse_pos):
+                        self.to_menu()
+
+            end_screen.fill((0, 0, 0))
+            '''big_sky = pygame.image.load("sky.jpg")
+                    # масштабируем картинку под размер экрана
+                    sky = scale(big_sky, ((win_width, win_height))'''
+            draw_text(end_screen, 'Война жуков', self.common_x, self.koef_y,
+                      font_size=100)
+            draw_text(end_screen, win_or_fail, self.common_x + 70, self.koef_y * 3,
+                      font_size=100)
+            draw_text(end_screen, f'Время: {results["time"]}', self.common_x - 100, self.koef_y * 4)
+            draw_text(end_screen, f'Кол-во убитых жуков: {results["bugs"]}', self.common_x - 100, self.koef_y * 5)
+            draw_text(end_screen, f'Кол-во подобранных предметов: {results["scale"]}', self.common_x - 100, self.koef_y * 6)
+            draw_text(end_screen, f'Кол-во оставшихся жизней: {results["live"]}', self.common_x - 100, self.koef_y * 7)
+            last_button.text_button('К главному меню')
+            pygame.display.flip()
+
     # Продолжить игру
     def continue_game(self):
-        # Нужна проверка на существование последней игры
         try:
             self.game.game()
             print(1)
         except Exception:
             # Подтащила время из БД
-            резулт это уровень игры, время замени на id игры
+            '''резулт это уровень игры, время замени на id игры'''
             id, result = self.connection.cursor().execute("""SELECT time, result FROM Game WHERE id_gamer=?""",
                                                    (self.id_gamer)).fetchone()
 
@@ -218,7 +262,7 @@ class Start_Window():
             draw_text(statistics_screen, f"Имя: {information_gamer[1]}", self.common_x, self.koef_y * 2)
             draw_text(statistics_screen, f"Кол-во игр: {information_gamer[2]}", self.common_x, self.koef_y * 3)
             draw_text(statistics_screen, f"Кол-во побед: {information_gamer[3]}", self.common_x, self.koef_y * 4)
-            draw_text(statistics_screen, f"Кол-во проигрышей: {information_gamer[5]}", self.common_x, self.koef_y * 5)
+            draw_text(statistics_screen, f"Кол-во проигрышей: {information_gamer[4]}", self.common_x, self.koef_y * 5)
             draw_text(statistics_screen, f"Кол-во убитых жуков: {information_gamer[5]}", self.common_x, self.koef_y * 6)
             draw_text(statistics_screen, f"Кол-во жуков-помощников: {information_gamer[6]}", self.common_x,
                       self.koef_y * 7)
@@ -231,7 +275,6 @@ class Start_Window():
 
     # Показать магазин
     def show_shop(self):
-
         # Настройка окна
         shop_screen = pygame.display.set_mode((self.win_width, self.win_height))
         pygame.display.set_caption("Магазин")
@@ -250,7 +293,8 @@ class Start_Window():
         # Информация об игроке
         res = self.connection.cursor().execute("""SELECT count_assistants, count_coins FROM Gamer WHERE id_gamer=?""",
                                                (self.id_gamer,)).fetchone()
-        self.connection.commit()
+        print(res)
+
 
         # Кнопка "Купить"
         buy = Button(shop_screen, self.common_x, self.koef_y * 7)
@@ -267,10 +311,12 @@ class Start_Window():
                     if last.button.collidepoint(mouse_pos):
                         self.to_menu()
                     if buy.button.collidepoint(mouse_pos):
-                        print(res)
                         if res[1] >= 1000:  # Если денег хватает
-                            self.connection.cursor().execute(f"""UPDATE SET count_assistants = {res[0] + 1} 
-                            SET count_coins = {res[1] - 1000} FROM Gamer WHERE id_gamer=?""", (self.id_gamer,))
+                            self.connection.cursor().execute("""UPDATE Gamer SET count_assistants = ?
+                            WHERE id_gamer=?""", (res[0] + 1, self.id_gamer))
+                            self.connection.cursor().execute("""UPDATE Gamer 
+                                                        SET count_coins = ?
+                                                        WHERE id_gamer=?""", (res[1] - 1000, self.id_gamer))
                             self.connection.commit()
                             flag_not_money = False
                         else:
@@ -278,6 +324,9 @@ class Start_Window():
 
             # Отрисовываем объекты
             shop_screen.fill(((0, 0, 0)))
+            res = self.connection.cursor().execute(
+                """SELECT count_assistants, count_coins FROM Gamer WHERE id_gamer=?""",
+                (self.id_gamer,)).fetchone()
             if flag_not_money:
                 draw_text(shop_screen, 'Не хватает денег', self.common_x, self.koef_y * 8)
             ''' assistent = pygame.image.tostring(assistent, "RGBA")'''
@@ -317,7 +366,7 @@ class Start_Window():
 
             # Отрисовываем объекты
             for i in range(len(text)):
-                draw_text(information_screen, text[i], self.common_x -500, self.win_height // 15 * (i + 3), font_size=40)
+                draw_text(information_screen, text[i], 100, self.win_height // 15 * (i + 3))
             draw_text(information_screen, 'Информация', self.common_x, self.koef_y, font_size=100)
             pygame.display.update()  # Обновляем окно
 
