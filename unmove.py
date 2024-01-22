@@ -1,6 +1,7 @@
 import pygame
 from math import sqrt
 
+
 class game_object:
     def __init__(self, x, y):
         self.x = x
@@ -40,14 +41,14 @@ class Armor(game_object):
 
 
 class Weapon(game_object):
-    def __init__(self, x, y, image_path, rang, damage):
+    def __init__(self, x, y, image, rang, damage):
         super().__init__(x, y)
-        self.image = pygame.image.load(image_path)
+        self.image = pygame.image.load(weapon_image[image])
         self.image = pygame.transform.scale(self.image, (30, 30))
         self.rang, self.damage = rang, damage
 
     def get_char(self):
-        return {'rang': self.rang, 'attack': self.damage, 'image': self.image}
+        return {'rang': self.rang, 'attack': self.damage, 'image': pygame.transform.scale(self.image, (50, 50))}
 
 
 class Scales(game_object):
@@ -55,3 +56,6 @@ class Scales(game_object):
         super().__init__(x, y)
         self.image = pygame.image.load(image_path)
         self.image = pygame.transform.scale(self.image, (30, 30))
+
+
+weapon_image = ['меч_1.png', 'меч_большой.png']

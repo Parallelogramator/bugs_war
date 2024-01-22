@@ -1,5 +1,6 @@
 import pygame
 from math import sqrt
+from unmove import Weapon
 
 
 class Players:
@@ -30,7 +31,7 @@ class Players:
 
         self.sprite = pygame.sprite.Sprite()
         # определим его вид
-        self.sprite.image = self.image
+        self.sprite.image = pygame.transform.scale(self.image, (50, 50))
         self.sprite.rect = (50, 50, 50, 50)
         # добавим спрайт в группу
         self.all_weapon_sprites.add(self.sprite)
@@ -133,13 +134,16 @@ class Players:
         # определим его вид
         self.sprite.image = char.get('image')
         # и размеры
+        a = False
 
         if len(self.weapon) == 2:
             self.sprite.rect = (50, 50+(51*(self.current_weapon)), 50, 50)
             # добавим спрайт в группу
             char.pop('image')
             self.all_weapon_sprites.remove(self.all_weapon[self.current_weapon])
+            a = self.all_weapon[self.current_weapon].image
             self.all_weapon[self.current_weapon] = self.sprite
+            print(dir(self.sprite.image))
             self.all_weapon_sprites.add(self.sprite)
             self.weapon[self.current_weapon] = char
         else:
@@ -152,6 +156,7 @@ class Players:
             char.pop('image')
             self.weapon.append(char)
         print("Adding weapon")
+        return a
 
     def change_weapon(self):
         self.current_weapon = (self.current_weapon+1) % 2
@@ -179,11 +184,11 @@ class Players:
 
 
 class Bug:
-    def __init__(self, x, y, speed):
+    def __init__(self, x, y, speed, level):
         self.x = x
         self.y = y
         self.speed = speed
-        self.bug_right = pygame.image.load('жуг.png')
+        self.bug_right = pygame.image.load(bugs_image[level])
         self.bug_left = pygame.transform.flip(self.bug_right, True, False)
         self.image = self.bug_right
         self.hp = 20
@@ -211,3 +216,6 @@ class Bug:
     def pos_bg(self, vel_x, vel_y):
         self.x += vel_x
         self.y += vel_y
+
+
+bugs_image = ['жуг.png', 'жук_фиолетовый.png']

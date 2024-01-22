@@ -16,11 +16,11 @@ def draw_text(surface, text, x, y, font=None, font_size=60, color=(255, 255, 255
     surface.blit(new_text, (x, y))
 
 
-def save(self, time, id_gamer, connection):
+def save(self, id_gamer, connection):
     self.background = pygame.image.tostring(self.background, "RGBA")
-    # Вот загрузка файла в переменную path
+    '''в от тут надо вставить сохранение по id игры'''
     file = connection.cursor().execute("""SELECT path FROM Game WHERE id_gamer=?""", (id_gamer,)).fetchone()
-    with open(f"{time}.dat", "wb") as fp:
+    with open(f"data/{file}.dat", "wb") as fp:
         pickle.dump(self, fp)
 
 
@@ -35,8 +35,8 @@ class Start_Window():
         self.win_width, self.win_height = infoObject.current_w, infoObject.current_h
 
         # Настройка окна
-        screen = pygame.display.set_mode((self.win_width, self.win_height))
-        screen.fill((0, 0, 0))
+        self.screen = pygame.display.set_mode((self.win_width, self.win_height))
+        self.screen.fill((0, 0, 0))
         '''big_sky = pygame.image.load("sky.jpg")
         # масштабируем картинку под размер экрана
         sky = scale(big_sky, ((win_width, win_height))'''
@@ -51,7 +51,6 @@ class Start_Window():
                                                  (self.win_width * 20, self.win_height * 20))  # новые размеры персонажа
 
         # Переменные
-        self.game = Game(self.background)
         self.id_gamer = id_gamer
         try:
             self.name_gamer = self.connection.cursor().execute("""SELECT name_gamer FROM Gamer WHERE id_gamer=?""",
@@ -63,13 +62,17 @@ class Start_Window():
         self.koef_y = self.win_height // 10
 
         # Создание кнопок
-        start_button = Button(screen, self.common_x, self.koef_y * 2)
-        continue_button = Button(screen, self.common_x, self.koef_y * 3)
-        statistics_button = Button(screen, self.common_x, self.koef_y * 4)
-        shop_button = Button(screen, self.common_x, self.koef_y * 5)
-        information_button = Button(screen, self.common_x, self.koef_y * 6)
-        quit_button = Button(screen, self.common_x, self.koef_y * 7)
+        self.start_button = Button(self.screen, self.common_x, self.koef_y * 2)
+        self.continue_button = Button(self.screen, self.common_x, self.koef_y * 3)
+        self.statistics_button = Button(self.screen, self.common_x, self.koef_y * 4)
+        self.shop_button = Button(self.screen, self.common_x, self.koef_y * 5)
+        self.information_button = Button(self.screen, self.common_x, self.koef_y * 6)
+        self.quit_button = Button(self.screen, self.common_x, self.koef_y * 7)
 
+        self.cycle()
+
+
+    def cycle(self):
         # Основной цикл
         while True:
             for event in pygame.event.get():
@@ -82,20 +85,24 @@ class Start_Window():
 
                     # Проверка нажатия кнопок
                     if self.check_name():  # Если введено имя
-                        if start_button.button.collidepoint(mouse_pos):
+                        if self.start_button.button.collidepoint(mouse_pos):
                             self.start_game()
-                        if continue_button.button.collidepoint(mouse_pos):
+                        if self.continue_button.button.collidepoint(mouse_pos):
                             self.continue_game()
-                        if statistics_button.button.collidepoint(mouse_pos):
+                        if self.statistics_button.button.collidepoint(mouse_pos):
                             self.show_statistics()
-                        if shop_button.button.collidepoint(mouse_pos):
+                        if self.shop_button.button.collidepoint(mouse_pos):
                             self.show_shop()
-                    if information_button.button.collidepoint(mouse_pos):
+                    if self.information_button.button.collidepoint(mouse_pos):
                         self.show_information()
-                    if quit_button.button.collidepoint(mouse_pos):
-                        save(self.game, time.time(), self.id_gamer, self.connection)
-                        self.connection.close()
+
+                    if self.quit_button.button.collidepoint(mouse_pos):
                         pygame.quit()
+                        try:
+                            save(self.game, self.id_gamer, self.connection)
+                        except Exception:
+                            pass
+                        self.connection.close()
                         sys.exit()
 
                 # Добавление имени
@@ -107,25 +114,26 @@ class Start_Window():
                     self.input_name = False
 
             # Отрисовываем объекты
-            screen.fill((0, 0, 0))
+            self.screen.fill((0, 0, 0))
             '''big_sky = pygame.image.load("sky.jpg")
                     # масштабируем картинку под размер экрана
                     sky = scale(big_sky, ((win_width, win_height))'''
-            draw_text(screen, 'Война жуков', self.common_x, self.koef_y,
+            draw_text(self.screen, 'Война жуков', self.common_x, self.koef_y,
                       font_size=100)
-            start_button.text_button('Начать игру')
-            continue_button.text_button('Продолжить игру')
-            statistics_button.text_button('Статистика')
-            information_button.text_button('Информация')
-            shop_button.text_button('Магазин')
-            quit_button.text_button('Выйти из игры')
-            draw_text(screen, 'Имя:', self.common_x, self.koef_y * 8)
-            draw_text(screen, self.name_gamer, self.common_x + 200, self.koef_y * 8)
+            self.start_button.text_button('Начать игру')
+            self.continue_button.text_button('Продолжить игру')
+            self.statistics_button.text_button('Статистика')
+            self.information_button.text_button('Информация')
+            self. shop_button.text_button('Магазин')
+            self.quit_button.text_button('Выйти из игры')
+            draw_text(self.screen, 'Имя:', self.common_x, self.koef_y * 8)
+            draw_text(self.screen, self.name_gamer, self.common_x + 200, self.koef_y * 8)
 
             # Если не введено имя
             if self.input_name == True:
-                draw_text(screen, 'Введите имя', self.common_x, self.koef_y * 9)
+                draw_text(self.screen, 'Введите имя', self.common_x, self.koef_y * 9)
             pygame.display.flip()
+
 
     # Проверка на имя
     def check_name(self):
@@ -133,9 +141,9 @@ class Start_Window():
             res = self.connection.cursor().execute("""SELECT name_gamer FROM Gamer""").fetchall()
             if (self.name_gamer,) not in res:  # Если имени нет в БД, добавляем
                 self.connection.cursor().execute("""INSERT INTO Gamer(name_gamer) VALUES(?)""", (self.name_gamer,))
-                self.id_gamer = self.connection.cursor().execute("""SELECT id_gamer FROM Gamer WHERE name_gamer=?""",
+            self.id_gamer = self.connection.cursor().execute("""SELECT id_gamer FROM Gamer WHERE name_gamer=?""",
                                                                  (self.name_gamer,)).fetchone()[0]
-                self.connection.commit()
+            self.connection.commit()
             return True
         self.input_name = True
         return False
@@ -148,27 +156,77 @@ class Start_Window():
 
     # Возвращение к меню
     def to_menu(self):
-        self.__init__(self.id_gamer)
+        self.cycle()
 
     # Начать игру
     def start_game(self):
-        self.game.game()
+        self.game = Game(self.background, 0)
+        to_end = self.game.game()
+        if to_end['win'] == 3 or to_end['win'] == 0:
+            self.end_window(to_end)
+
         '''
         thread = threading.Thread(target=self.game.save)
         thread.start()'''
 
+    def end_window(self, results):
+        # Настройка окна
+        end_screen = pygame.display.set_mode((self.win_width, self.win_height), pygame.FULLSCREEN)
+        end_screen.fill((0, 0, 0))
+        '''big_sky = pygame.image.load("sky.jpg")
+        # масштабируем картинку под размер экрана
+        sky = scale(big_sky, ((win_width, win_height))'''
+        pygame.display.set_caption("Война жуков")
+        last_button = self.return_button(end_screen)
+        if results['win'] == 3:
+            win_or_fail = 'Победа'
+        else:
+            win_or_fail = 'Поражение'
+        # Основной цикл
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    self.connection.close()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+
+                    # Проверка нажатия кнопок
+                    if last_button.button.collidepoint(mouse_pos):
+                        self.to_menu()
+
+            end_screen.fill((0, 0, 0))
+            '''big_sky = pygame.image.load("sky.jpg")
+                    # масштабируем картинку под размер экрана
+                    sky = scale(big_sky, ((win_width, win_height))'''
+            draw_text(end_screen, 'Война жуков', self.common_x, self.koef_y,
+                      font_size=100)
+            draw_text(end_screen, win_or_fail, self.common_x + 70, self.koef_y * 3,
+                      font_size=100)
+            draw_text(end_screen, f'Время: {results["time"]}', self.common_x - 100, self.koef_y * 4)
+            draw_text(end_screen, f'Кол-во убитых жуков: {results["bugs"]}', self.common_x - 100, self.koef_y * 5)
+            draw_text(end_screen, f'Кол-во подобранных предметов: {results["scale"]}', self.common_x - 100, self.koef_y * 6)
+            draw_text(end_screen, f'Кол-во оставшихся жизней: {results["live"]}', self.common_x - 100, self.koef_y * 7)
+            last_button.text_button('К главному меню')
+            pygame.display.flip()
+
     # Продолжить игру
     def continue_game(self):
-        # Нужна проверка на существование последней игры
         try:
             self.game.game()
+            print(1)
         except Exception:
             # Подтащила время из БД
-            time = self.connection.cursor().execute("""SELECT time FROM Game WHERE id_gamer=?""",
-                                                    (self.id_gamer)).fetchone()
-            print(time)
-            with open(f"1705232418.5041902.dat", "rb") as fp:
-                self.game = pickle.load(fp)
+            '''резулт это уровень игры, время замени на id игры'''
+            id, result = self.connection.cursor().execute("""SELECT time, result FROM Game WHERE id_gamer=?""",
+                                                   (self.id_gamer)).fetchone()
+
+            if result is not None:
+                self.game = Game(self.background, result+1)
+            else:
+                with open(f"data/{id}.dat", "rb") as fp:
+                    self.game = pickle.load(fp)
             self.game.game()
 
     # Показать статистику
@@ -204,7 +262,7 @@ class Start_Window():
             draw_text(statistics_screen, f"Имя: {information_gamer[1]}", self.common_x, self.koef_y * 2)
             draw_text(statistics_screen, f"Кол-во игр: {information_gamer[2]}", self.common_x, self.koef_y * 3)
             draw_text(statistics_screen, f"Кол-во побед: {information_gamer[3]}", self.common_x, self.koef_y * 4)
-            draw_text(statistics_screen, f"Кол-во проигрышей: {information_gamer[5]}", self.common_x, self.koef_y * 5)
+            draw_text(statistics_screen, f"Кол-во проигрышей: {information_gamer[4]}", self.common_x, self.koef_y * 5)
             draw_text(statistics_screen, f"Кол-во убитых жуков: {information_gamer[5]}", self.common_x, self.koef_y * 6)
             draw_text(statistics_screen, f"Кол-во жуков-помощников: {information_gamer[6]}", self.common_x,
                       self.koef_y * 7)
@@ -217,11 +275,17 @@ class Start_Window():
 
     # Показать магазин
     def show_shop(self):
-
         # Настройка окна
         shop_screen = pygame.display.set_mode((self.win_width, self.win_height))
         pygame.display.set_caption("Магазин")
         shop_screen.fill(((0, 0, 0)))
+        flag_not_money = False
+
+        # Картинка
+        '''assistent = pygame.image.load('задник.png')
+        self.background = pygame.transform.scale(background,
+                                                 (self.win_width * 20, self.win_height * 20)) # новые размеры персонажа
+        assistent = pygame.image.tostring(assistent, "RGBA")'''
 
         # Кнопка "Назад"
         last = self.return_button(shop_screen)
@@ -229,7 +293,8 @@ class Start_Window():
         # Информация об игроке
         res = self.connection.cursor().execute("""SELECT count_assistants, count_coins FROM Gamer WHERE id_gamer=?""",
                                                (self.id_gamer,)).fetchone()
-        self.connection.commit()
+        print(res)
+
 
         # Кнопка "Купить"
         buy = Button(shop_screen, self.common_x, self.koef_y * 7)
@@ -246,20 +311,30 @@ class Start_Window():
                     if last.button.collidepoint(mouse_pos):
                         self.to_menu()
                     if buy.button.collidepoint(mouse_pos):
-                        if res[1] >= 20:  # Если денег хватает
-                            self.connection.cursor().execute(f"""UPDATE SET count_assistants = {res[0] + 1} 
-                            SET count_coins = {res[1] - 20} FROM Gamer WHERE id_gamer=?""", (self.id_gamer,))
+                        if res[1] >= 1000:  # Если денег хватает
+                            self.connection.cursor().execute("""UPDATE Gamer SET count_assistants = ?
+                            WHERE id_gamer=?""", (res[0] + 1, self.id_gamer))
+                            self.connection.cursor().execute("""UPDATE Gamer 
+                                                        SET count_coins = ?
+                                                        WHERE id_gamer=?""", (res[1] - 1000, self.id_gamer))
                             self.connection.commit()
+                            flag_not_money = False
                         else:
-                            draw_text(shop_screen, 'Не хватает денег', self.common_x, self.koef_y * 8)
+                            flag_not_money = True
 
             # Отрисовываем объекты
             shop_screen.fill(((0, 0, 0)))
+            res = self.connection.cursor().execute(
+                """SELECT count_assistants, count_coins FROM Gamer WHERE id_gamer=?""",
+                (self.id_gamer,)).fetchone()
+            if flag_not_money:
+                draw_text(shop_screen, 'Не хватает денег', self.common_x, self.koef_y * 8)
+            ''' assistent = pygame.image.tostring(assistent, "RGBA")'''
             draw_text(shop_screen, 'Магазин', self.common_x, self.koef_y, font_size=100)
             draw_text(shop_screen, f'Кол-во жуков-помощников: {res[0]}', self.common_x, self.koef_y * 2)
             draw_text(shop_screen, f'Кол-во монет: {res[1]}', self.common_x, self.koef_y * 3)
             last.text_button('Назад')
-            buy.text_button('Купить')
+            buy.text_button('Купить за 1000 монет')
             pygame.display.flip()
 
     def show_information(self):
@@ -274,11 +349,8 @@ class Start_Window():
 
         # Информация из файла
         f = open('Information', encoding='UTF-8').readlines()
-        text = '\n'.join([j.strip() for j in f])
+        text = [j.strip() for j in f]
 
-        # Отрисовываем объекты
-        draw_text(information_screen, text, self.common_x - 400, self.koef_y * 2)
-        draw_text(information_screen, 'Информация', self.common_x, self.koef_y, font_size=100)
 
         # Основной цикл
         while True:
@@ -291,8 +363,10 @@ class Start_Window():
                     # Проверка нажатия кнопок
                     if last.button.collidepoint(mouse_pos):
                         self.to_menu()
+
             # Отрисовываем объекты
-            draw_text(information_screen, text, self.common_x - 400, self.koef_y * 2)
+            for i in range(len(text)):
+                draw_text(information_screen, text[i], 100, self.win_height // 15 * (i + 3))
             draw_text(information_screen, 'Информация', self.common_x, self.koef_y, font_size=100)
             pygame.display.update()  # Обновляем окно
 
