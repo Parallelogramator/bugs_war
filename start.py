@@ -1,7 +1,7 @@
 import pickle
 import sqlite3
 import sys
-import time
+import os
 
 import pygame
 
@@ -71,7 +71,6 @@ class Start_Window():
 
         self.cycle()
 
-
     def cycle(self):
         # Основной цикл
         while True:
@@ -124,7 +123,7 @@ class Start_Window():
             self.continue_button.text_button('Продолжить игру')
             self.statistics_button.text_button('Статистика')
             self.information_button.text_button('Информация')
-            self. shop_button.text_button('Магазин')
+            self.shop_button.text_button('Магазин')
             self.quit_button.text_button('Выйти из игры')
             draw_text(self.screen, 'Имя:', self.common_x, self.koef_y * 8)
             draw_text(self.screen, self.name_gamer, self.common_x + 200, self.koef_y * 8)
@@ -134,7 +133,6 @@ class Start_Window():
                 draw_text(self.screen, 'Введите имя', self.common_x, self.koef_y * 9)
             pygame.display.flip()
 
-
     # Проверка на имя
     def check_name(self):
         if self.name_gamer != '':
@@ -142,7 +140,7 @@ class Start_Window():
             if (self.name_gamer,) not in res:  # Если имени нет в БД, добавляем
                 self.connection.cursor().execute("""INSERT INTO Gamer(name_gamer) VALUES(?)""", (self.name_gamer,))
             self.id_gamer = self.connection.cursor().execute("""SELECT id_gamer FROM Gamer WHERE name_gamer=?""",
-                                                                 (self.name_gamer,)).fetchone()[0]
+                                                             (self.name_gamer,)).fetchone()[0]
             self.connection.commit()
             return True
         self.input_name = True
@@ -163,6 +161,11 @@ class Start_Window():
         self.game = Game(self.background, 0)
         to_end = self.game.game()
         if to_end['win'] == 3 or to_end['win'] == 0:
+            self.game = None
+            file = self.connection.cursor().execute("""SELECT path FROM Game WHERE id_game=?""", (self.id_gamer,)).fetchone()
+            if file:
+                os.remote(f"data/{file}.dat")
+
             self.end_window(to_end)
 
         '''
@@ -178,10 +181,25 @@ class Start_Window():
         sky = scale(big_sky, ((win_width, win_height))'''
         pygame.display.set_caption("Война жуков")
         last_button = self.return_button(end_screen)
+        information_gamer = self.connection.cursor().execute("""SELECT * FROM Gamer WHERE id_gamer=?""",
+                                                             (self.id_gamer,)).fetchone()
+        self.connection.cursor().execute(
+            """INSERT INTO Game(id_gamer, result, time, dead_bugs, hand_items, remaining_lives, path) VALUES(?, ?, ?, ?, ?, ?, ?)""",
+            (self.id_gamer, results['win'], results['time'], results["bugs"], results["scale"], results["live"], None))
+        self.connection.cursor().execute("""UPDATE Gamer SET count_games = ?
+                                    WHERE id_gamer=?""", (information_gamer[2] + 1, self.id_gamer))
+        self.connection.cursor().execute("""UPDATE Gamer SET all_dead_bugs = ?
+                                            WHERE id_gamer=?""",
+                                         (information_gamer[5] + results['bugs'], self.id_gamer))
         if results['win'] == 3:
             win_or_fail = 'Победа'
+            self.connection.cursor().execute("""UPDATE Gamer SET count_win = ?
+                                        WHERE id_gamer=?""", (information_gamer[3] + 1, self.id_gamer))
         else:
             win_or_fail = 'Поражение'
+            self.connection.cursor().execute("""UPDATE Gamer SET count_fail = ?
+                                                    WHERE id_gamer=?""", (information_gamer[4] + 1, self.id_gamer))
+            self.connection.commit()
         # Основной цикл
         while True:
             for event in pygame.event.get():
@@ -206,7 +224,8 @@ class Start_Window():
                       font_size=100)
             draw_text(end_screen, f'Время: {results["time"]}', self.common_x - 100, self.koef_y * 4)
             draw_text(end_screen, f'Кол-во убитых жуков: {results["bugs"]}', self.common_x - 100, self.koef_y * 5)
-            draw_text(end_screen, f'Кол-во подобранных предметов: {results["scale"]}', self.common_x - 100, self.koef_y * 6)
+            draw_text(end_screen, f'Кол-во подобранных предметов: {results["scale"]}', self.common_x - 100,
+                      self.koef_y * 6)
             draw_text(end_screen, f'Кол-во оставшихся жизней: {results["live"]}', self.common_x - 100, self.koef_y * 7)
             last_button.text_button('К главному меню')
             pygame.display.flip()
@@ -220,10 +239,10 @@ class Start_Window():
             # Подтащила время из БД
             '''резулт это уровень игры, время замени на id игры'''
             id, result = self.connection.cursor().execute("""SELECT time, result FROM Game WHERE id_gamer=?""",
-                                                   (self.id_gamer)).fetchone()
+                                                          (self.id_gamer)).fetchone()
 
             if result is not None:
-                self.game = Game(self.background, result+1)
+                self.game = Game(self.background, result + 1)
             else:
                 with open(f"data/{id}.dat", "rb") as fp:
                     self.game = pickle.load(fp)
@@ -244,6 +263,17 @@ class Start_Window():
 
         last = self.return_button(statistics_screen)
 
+        # Отрисовываем объекты
+        draw_text(statistics_screen, 'Статистика', self.common_x, self.koef_y, font_size=100)
+        draw_text(statistics_screen, f"Имя: {information_gamer[1]}", self.common_x, self.koef_y * 2)
+        draw_text(statistics_screen, f"Кол-во игр: {information_gamer[2]}", self.common_x, self.koef_y * 3)
+        draw_text(statistics_screen, f"Кол-во побед: {information_gamer[3]}", self.common_x, self.koef_y * 4)
+        draw_text(statistics_screen, f"Кол-во проигрышей: {information_gamer[4]}", self.common_x, self.koef_y * 5)
+        draw_text(statistics_screen, f"Кол-во убитых жуков: {information_gamer[5]}", self.common_x, self.koef_y * 6)
+        draw_text(statistics_screen, f"Кол-во жуков-помощников: {information_gamer[6]}", self.common_x,
+                  self.koef_y * 7)
+        draw_text(statistics_screen, f"Кол-во монет: {information_gamer[7]}", self.common_x, self.koef_y * 8)
+
         # Основной цикл
         while True:
 
@@ -256,36 +286,18 @@ class Start_Window():
                     # Проверка нажатия кнопок
                     if last.button.collidepoint(mouse_pos):
                         self.to_menu()
-            # Отрисовываем объекты
-            statistics_screen.fill(((0, 0, 0)))
-            draw_text(statistics_screen, 'Статистика', self.common_x, self.koef_y, font_size=100)
-            draw_text(statistics_screen, f"Имя: {information_gamer[1]}", self.common_x, self.koef_y * 2)
-            draw_text(statistics_screen, f"Кол-во игр: {information_gamer[2]}", self.common_x, self.koef_y * 3)
-            draw_text(statistics_screen, f"Кол-во побед: {information_gamer[3]}", self.common_x, self.koef_y * 4)
-            draw_text(statistics_screen, f"Кол-во проигрышей: {information_gamer[4]}", self.common_x, self.koef_y * 5)
-            draw_text(statistics_screen, f"Кол-во убитых жуков: {information_gamer[5]}", self.common_x, self.koef_y * 6)
-            draw_text(statistics_screen, f"Кол-во жуков-помощников: {information_gamer[6]}", self.common_x,
-                      self.koef_y * 7)
-            draw_text(statistics_screen, f"Кол-во монет: {information_gamer[7]}", self.common_x, self.koef_y * 8)
 
-            # Кнопка "Назад"
-            last.text_button('Назад')
-
-            pygame.display.update()  # Обновляем окно
+            pygame.display.flip()
 
     # Показать магазин
     def show_shop(self):
         # Настройка окна
         shop_screen = pygame.display.set_mode((self.win_width, self.win_height))
-        pygame.display.set_caption("Магазин")
-        shop_screen.fill(((0, 0, 0)))
         flag_not_money = False
 
         # Картинка
-        '''assistent = pygame.image.load('задник.png')
-        self.background = pygame.transform.scale(background,
-                                                 (self.win_width * 20, self.win_height * 20)) # новые размеры персонажа
-        assistent = pygame.image.tostring(assistent, "RGBA")'''
+        image = pygame.image.load('жуг_бобрый.png').convert_alpha()
+        image = pygame.transform.scale(image, (400, 300))
 
         # Кнопка "Назад"
         last = self.return_button(shop_screen)
@@ -293,8 +305,6 @@ class Start_Window():
         # Информация об игроке
         res = self.connection.cursor().execute("""SELECT count_assistants, count_coins FROM Gamer WHERE id_gamer=?""",
                                                (self.id_gamer,)).fetchone()
-        print(res)
-
 
         # Кнопка "Купить"
         buy = Button(shop_screen, self.common_x, self.koef_y * 7)
@@ -323,13 +333,12 @@ class Start_Window():
                             flag_not_money = True
 
             # Отрисовываем объекты
-            shop_screen.fill(((0, 0, 0)))
+            shop_screen.blit(image, (self.common_x, self.koef_y * 4 - 40))
             res = self.connection.cursor().execute(
                 """SELECT count_assistants, count_coins FROM Gamer WHERE id_gamer=?""",
                 (self.id_gamer,)).fetchone()
             if flag_not_money:
                 draw_text(shop_screen, 'Не хватает денег', self.common_x, self.koef_y * 8)
-            ''' assistent = pygame.image.tostring(assistent, "RGBA")'''
             draw_text(shop_screen, 'Магазин', self.common_x, self.koef_y, font_size=100)
             draw_text(shop_screen, f'Кол-во жуков-помощников: {res[0]}', self.common_x, self.koef_y * 2)
             draw_text(shop_screen, f'Кол-во монет: {res[1]}', self.common_x, self.koef_y * 3)
@@ -341,8 +350,6 @@ class Start_Window():
 
         # Настройка окна
         information_screen = pygame.display.set_mode((self.win_width, self.win_height))
-        pygame.display.set_caption("Информация")
-        information_screen.fill(((0, 0, 0)))
 
         # Кнопка "Назад"
         last = self.return_button(information_screen)
@@ -351,6 +358,10 @@ class Start_Window():
         f = open('Information', encoding='UTF-8').readlines()
         text = [j.strip() for j in f]
 
+        # Отрисовываем объекты
+        for i in range(len(text)):
+            draw_text(information_screen, text[i], 100, self.win_height // 15 * (i + 3))
+        draw_text(information_screen, 'Информация', self.common_x, self.koef_y, font_size=100)
 
         # Основной цикл
         while True:
@@ -363,12 +374,7 @@ class Start_Window():
                     # Проверка нажатия кнопок
                     if last.button.collidepoint(mouse_pos):
                         self.to_menu()
-
-            # Отрисовываем объекты
-            for i in range(len(text)):
-                draw_text(information_screen, text[i], 100, self.win_height // 15 * (i + 3))
-            draw_text(information_screen, 'Информация', self.common_x, self.koef_y, font_size=100)
-            pygame.display.update()  # Обновляем окно
+            pygame.display.flip()
 
 
 # Класс для создания кнопок
@@ -388,9 +394,9 @@ class Button:
         self.button = pygame.draw.rect(self.surface, self.color_button, (self.x, self.y, 450, 45))
 
     # Рисование текста
-    def text_button(self, text, font=None, font_size=70, color=(255, 255, 255)):
+    def text_button(self, text, font=None, font_size=60, color=(255, 255, 255)):
         self.draw_button()
-        draw_text(self.surface, text, self.x, self.y, font=None, font_size=60, color=(255, 255, 255))
+        draw_text(self.surface, text, self.x, self.y, font=font, font_size=font_size, color=color)
 
 
 if __name__ == "__main__":
