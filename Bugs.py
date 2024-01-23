@@ -94,7 +94,7 @@ class Game:
 
     def game(self):
         live = 1
-        res = None
+        res = -1
         font = pygame.font.Font(None, 36)
         run = True
         start_bugs = time.time()
