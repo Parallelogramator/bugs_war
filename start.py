@@ -17,11 +17,11 @@ def draw_text(surface, text, x, y, font=None, font_size=60, color=(255, 255, 255
 
 # Сохранение игры
 def save(self, cursor, id_game):
-    print('dddddddddd')
-    print(id_game, os.listdir('data/'))
-    self.background = pygame.image.tostring(self.background, "RGBA")
+    print('fff')
+    print(cursor.execute("""SELECT * FROM Game WHERE id_game=?""", (id_game,)).fetchall())
     file = cursor.execute("""SELECT path FROM Game WHERE id_game=?""", (id_game,)).fetchone()[0]
-    with open(f"data/{file}.dat", "wb") as fp:
+    self.background = pygame.image.tostring(self.background, "RGBA")
+    with open(f"{file}.dat", "wb") as fp:
         pickle.dump(self, fp)
 
 
@@ -55,6 +55,7 @@ class Main_Window():
 
         # Переменные
         self.id_gamer = id_gamer
+        self.game = None
         try:
             self.name_gamer = self.cursor.execute("""SELECT name_gamer FROM Gamer WHERE id_gamer=?""",
                                                   (self.id_gamer,)).fetchone()[0]  # Имя игрока
@@ -146,6 +147,7 @@ class Main_Window():
                 self.connection.commit()
             self.id_gamer = self.cursor.execute("""SELECT id_gamer FROM Gamer WHERE name_gamer=?""",
                                                 (self.name_gamer,)).fetchone()[0]
+            print(self.id_gamer)
             return True
         self.input_name = True
         return False
@@ -420,4 +422,6 @@ class Button:
 
 
 if __name__ == "__main__":
+    print(os.getcwd())
+    print(os.listdir())
     Main_Window()
