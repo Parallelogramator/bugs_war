@@ -41,86 +41,55 @@ class Players:
     def move(self, keys, bg_x, bg_y):
         new_character_x = self.x
         new_character_y = self.y
-        if keys[pygame.K_a]:
-            new_character_x -= self.speed  # - Если клавиша `a` нажата и `a` равно True,
-            # то значение `new_character_x` уменьшается на `self.speed`.
-            # Затем переменные `player` и `position` присваиваются значение `player_right`.
 
+        # Обработка нажатий клавиш
+        if keys[pygame.K_a]:
+            new_character_x -= self.speed
             self.image = self.player_right
         if keys[pygame.K_d]:
-            new_character_x += self.speed  # - Если клавиша `d` нажата и `a` равно True,
-            # то значение `new_character_x` увеличивается на `self.speed`.
-            # Затем переменные `player` и `position` присваиваются значение `player_left`.
-
+            new_character_x += self.speed
             self.image = self.player_left
         if keys[pygame.K_w]:
-            new_character_y -= self.speed  # - Если клавиша `w` нажата и `a` равно True,
-            # то значение `new_character_y` уменьшается на `self.speed`.
-
+            new_character_y -= self.speed
         if keys[pygame.K_s]:
-            new_character_y += self.speed  # - Если клавиша `K_s` нажата и `a` равно True,
-            # то значение `new_character_y` увеличивается на `self.speed`.
-
+            new_character_y += self.speed
         if keys[pygame.K_LSHIFT]:
-            self.speed = 50  # - Если клавиша `K_DOWN` нажата и `a` равно True,
-            # То значение `self.speed` устанавливается равным 100.
-            # В противном случае значение `self.speed` устанавливается равным 5.
-
+            self.speed = 50
         else:
             self.speed = 10
 
-            # Проверка, не выходит ли персонаж за пределы окна или не врезается ли он в стены
-        prov_bg = True
-        vel_bg_x = 0
-        vel_bg_y = 0
-        if not (200 <= new_character_y <= self.win_height - 200) and not (
-                200 <= new_character_x <= self.win_width - 200):
-            if new_character_x > self.win_width - 200:
-                bg_x -= self.speed
-            else:
-                bg_x += self.speed
-            if new_character_y > self.win_height - 200:
-                bg_y -= self.speed
-                vel_bg_y = -self.speed
-            else:
-                bg_y += self.speed
-                vel_bg_y = self.speed
-
-            new_character_x = self.x
-            new_character_y = self.y
-
-            prov_bg = False
-
-        if not (200 <= new_character_x <= self.win_width - 200):
-            # Перемещение заднего плана, когда персонаж подходит к краю экрана
-            if new_character_x > self.win_width - 200:
-                bg_x -= self.speed
-                vel_bg_x = -self.speed
-            else:
-                bg_x += self.speed
-                vel_bg_x = self.speed
-
-            self.y = new_character_y
-
-            prov_bg = False
-
-        if not (200 <= new_character_y <= self.win_height - 200):
-            if new_character_y > self.win_height - 200:
-                bg_y -= self.speed
-                vel_bg_y = -self.speed
-            else:
-                bg_y += self.speed
-                vel_bg_y = self.speed
-
-            self.x = new_character_x
-
-            prov_bg = False
-
-        if prov_bg:
-            self.x = new_character_x
-            self.y = new_character_y
+        # Проверка, не выходит ли персонаж за пределы окна или не врезается ли он в стены
+        vel_bg_x, vel_bg_y, bg_x, bg_y = self.check_character_bounds(new_character_x, new_character_y, bg_x, bg_y)
 
         return vel_bg_x, vel_bg_y, bg_x, bg_y
+
+    def check_character_bounds(self, new_character_x, new_character_y, bg_x, bg_y):
+        self.boundary = 200
+        vel_bg_x, vel_bg_y = 0, 0
+
+        if not self.boundary <= new_character_y <= self.win_height - self.boundary:
+            bg_y, vel_bg_y, new_character_y = self.update_position(new_character_y, self.y, self.win_height, bg_y,
+                                                                   self.speed)
+
+        if not self.boundary <= new_character_x <= self.win_width - self.boundary:
+            bg_x, vel_bg_x, new_character_x = self.update_position(new_character_x, self.x, self.win_width, bg_x,
+                                                                   self.speed)
+
+        self.x, self.y = new_character_x, new_character_y
+
+        return vel_bg_x, vel_bg_y, bg_x, bg_y
+
+    def update_position(self, new_character_pos, character_pos, win_size, bg_pos, speed):
+        if new_character_pos > win_size - self.boundary:
+            bg_pos -= speed
+            vel_bg = -speed
+        else:
+            bg_pos += speed
+            vel_bg = speed
+
+        new_character_pos = character_pos
+
+        return bg_pos, vel_bg, new_character_pos
 
     def draw(self, win):
         win.blit(self.image, (self.x, self.y))

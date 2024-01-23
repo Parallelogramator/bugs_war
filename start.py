@@ -24,8 +24,7 @@ def save(self, id_gamer, connection):
         pickle.dump(self, fp)
 
 
-class Start_Window():
-
+class Start_Window:
     # Инициализация
     def __init__(self, id_gamer=None):
         pygame.init()

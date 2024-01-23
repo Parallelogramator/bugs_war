@@ -277,9 +277,10 @@ if __name__ == "__main__":
     #background = pygame.transform.scale(background,
                                         #(win_width * 20, win_height * 20))  # новые размеры персонажа
 
-    a = Game(background)
+    a = Game(background, 1)
 
     '''with open("savegame.dat", "rb") as fp:
         a = pickle.load(fp)'''
 
     a.game()
+
