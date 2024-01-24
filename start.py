@@ -17,11 +17,8 @@ def draw_text(surface, text, x, y, font=None, font_size=60, color=(255, 255, 255
 
 # Сохранение игры
 def save(self, cursor, id_game):
-    print('dddddddddd')
-    print(id_game, os.listdir('data/'))
     self.background = pygame.image.tostring(self.background, "RGBA")
     file = cursor.execute("""SELECT path FROM Game WHERE id_game=?""", (id_game,)).fetchone()[0]
-    print(file)
     with open(f"{file}.dat", "wb") as fp:
         pickle.dump(self, fp)
 
@@ -81,8 +78,8 @@ class Main_Window():
         try:
             if self.game is not None:
                 save(self.game, self.cursor, self.id_game)
-        except Exception as e:
-            print(e)
+        except Exception:
+            pass
         self.cursor.close()
         self.connection.close()
         sys.exit()
@@ -175,8 +172,6 @@ class Main_Window():
         self.game = Game(self.background, 0)
         to_end = self.game.game()
 
-        print(to_end)
-
         # Сохранение данные по игре
         self.cursor.execute(
             """UPDATE Game SET result=?, time=?, dead_bugs=?, hand_items=?, remaining_lives=? WHERE id_game=?""",
@@ -256,17 +251,13 @@ class Main_Window():
         try:
             self.game.game()
         except Exception:
-            al = self.cursor.execute("""SELECT id_game, result FROM Game WHERE id_gamer=?""",
-                                     (self.id_gamer,)).fetchall()
-            self.id_game, result = max(al, key=lambda x: x[0])
-            print(al, id, result)
+            self.id_game, result = max(self.cursor.execute("""SELECT id_game, result FROM Game WHERE id_gamer=?""",
+                                     (self.id_gamer,)).fetchall(), key=lambda x: x[0])
             if result != -1:
                 self.game = Game(self.background, result + 1)
             else:
-                print(os.listdir('data/'))
                 with open(f"data/{self.id_game}.dat", "rb") as fp:
                     self.game = pickle.load(fp)
-            print(self.game.game())
 
     # Показать статистику
     def show_statistics(self):
@@ -311,6 +302,7 @@ class Main_Window():
 
     # Показать магазин
     def show_shop(self):
+        
         # Настройка окна
         shop_screen = pygame.display.set_mode((self.win_width, self.win_height))
         flag_not_money = False
