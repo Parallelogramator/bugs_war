@@ -21,7 +21,8 @@ def save(self, cursor, id_game):
     print(id_game, os.listdir('data/'))
     self.background = pygame.image.tostring(self.background, "RGBA")
     file = cursor.execute("""SELECT path FROM Game WHERE id_game=?""", (id_game,)).fetchone()[0]
-    with open(f"data/{file}.dat", "wb") as fp:
+    print(file)
+    with open(f"{file}.dat", "wb") as fp:
         pickle.dump(self, fp)
 
 
@@ -80,8 +81,8 @@ class Main_Window():
         try:
             if self.game is not None:
                 save(self.game, self.cursor, self.id_game)
-        except Exception:
-            pass
+        except Exception as e:
+            print(e)
         self.cursor.close()
         self.connection.close()
         sys.exit()
@@ -173,7 +174,7 @@ class Main_Window():
         # Создание игры
         self.game = Game(self.background, 0)
         to_end = self.game.game()
-        
+
         print(to_end)
 
         # Сохранение данные по игре
@@ -257,15 +258,15 @@ class Main_Window():
         except Exception:
             al = self.cursor.execute("""SELECT id_game, result FROM Game WHERE id_gamer=?""",
                                      (self.id_gamer,)).fetchall()
-            id, result = max(al, key=lambda x: x[0])
+            self.id_game, result = max(al, key=lambda x: x[0])
             print(al, id, result)
             if result != -1:
                 self.game = Game(self.background, result + 1)
             else:
                 print(os.listdir('data/'))
-                with open(f"data/{id}.dat", "rb") as fp:
+                with open(f"data/{self.id_game}.dat", "rb") as fp:
                     self.game = pickle.load(fp)
-            self.game.game()
+            print(self.game.game())
 
     # Показать статистику
     def show_statistics(self):
