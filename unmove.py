@@ -24,7 +24,7 @@ class Artifact(game_object):
     def __init__(self, x, y, image_path):
         super().__init__(x, y)
         self.image = pygame.image.load(image_path)
-        self.image = pygame.transform.scale(self.image, (30, 30))
+        self.image = pygame.transform.scale(self.image, (50, 50))
 
 
 class Armor(game_object):
@@ -32,7 +32,7 @@ class Armor(game_object):
         super().__init__(x, y)
 
         self.image = pygame.image.load(image_path)
-        self.image = pygame.transform.scale(self.image, (30, 30))
+        self.image = pygame.transform.scale(self.image, (50, 50))
         self.protection = protection
         self.strength = strength
 
@@ -44,7 +44,7 @@ class Weapon(game_object):
     def __init__(self, x, y, image, rang, damage):
         super().__init__(x, y)
         self.image = pygame.image.load(weapon_image[image])
-        self.image = pygame.transform.scale(self.image, (30, 30))
+        self.image = pygame.transform.scale(self.image, (50, 50))
         self.rang, self.damage = rang, damage
 
     def get_char(self):
@@ -55,7 +55,7 @@ class Scales(game_object):
     def __init__(self, x, y, image_path):
         super().__init__(x, y)
         self.image = pygame.image.load(image_path)
-        self.image = pygame.transform.scale(self.image, (30, 30))
+        self.image = pygame.transform.scale(self.image, (50, 50))
 
 
 weapon_image = ['меч_1.png', 'меч_большой.png']

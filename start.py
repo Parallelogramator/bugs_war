@@ -183,11 +183,11 @@ class Main_Window():
         self.connection.commit()
 
         # Если игра завершилась поражением или победой
-        if to_end['win'] == 3 or to_end['win'] == 0:
+        if to_end['win'] == 3 or to_end['win'] == -1:
             self.game = None
             os.remove(f"{file_path}.dat")
             self.end_window(to_end)
-        # Иначе сохраняем  данные по игре
+        # Иначе сохраняем данные по игре
 
     # Финальное окно
     def end_window(self, results):

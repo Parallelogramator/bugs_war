@@ -1,8 +1,6 @@
 import time
 from math import sqrt
 from random import randint
-import pickle
-import asyncio
 import pygame
 
 from move import Players, Bug
@@ -30,27 +28,27 @@ def prov_game_objects(scales, weapons, armors, win, character_x, character_y, pl
     for scale in scales:
         scale.draw(win)
         dist = scale.dist(character_x, character_y)
-        if dist < 50:
+        if dist < 200:
             player.add_scale()
             scales.remove(scale)
 
     for weapon in weapons:
         weapon.draw(win)
         dist = weapon.dist(character_x, character_y)
-        if dist < 50 and key[pygame.K_e]:
+        if dist < 200 and key[pygame.K_e]:
             a = player.add_weapon(weapon.get_char())
             weapons.remove(weapon)
             if a:
                 weapons.append(Weapon(character_x, character_y,
-                                           randint(0, 1), randint(100, 100),
-                                           randint(100, 100)))
+                                      randint(0, 1), randint(100, 100),
+                                      randint(100, 100)))
                 weapons[-1].image = a
             break
 
     for armor in armors:
         armor.draw(win)
         dist = armor.dist(character_x, character_y)
-        if dist < 50 and key[pygame.K_e]:
+        if dist < 200 and key[pygame.K_e]:
             player.add_armor(armor.get_char())
             armors.remove(armor)
 
@@ -94,7 +92,7 @@ class Game:
 
     def game(self):
         live = 1
-        res = -1
+        res = 0
         font = pygame.font.Font(None, 36)
         run = True
         start_bugs = time.time()
@@ -109,7 +107,8 @@ class Game:
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     run = False
             if time.time() - start_bugs > 5:
-                self.bugs.append(Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5), self.level))
+                self.bugs.append(
+                    Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5), self.level))
                 start_bugs = time.time()
                 print("Bug")
             keys = pygame.key.get_pressed()
@@ -132,14 +131,14 @@ class Game:
 
             self.win.fill((0, 0, 0))  # Заполняем окно черным цветом
             self.win.blit(self.background,
-                     (self.bg_x, self.bg_y))  # Рисуем задний план
+                          (self.bg_x, self.bg_y))  # Рисуем задний план
             self.player.draw(self.win)  # Рисуем персонажа
 
             for bug in self.bugs:
                 dist = bug.move_towards(self.character_x, self.character_y)
                 bug.draw(self.win)
 
-                if dist < 50:
+                if dist < 200:
                     self.player.hp -= (1 * (1 / self.player.defence()))
                     print("Жук бьет персонажа!")
 
@@ -148,31 +147,35 @@ class Game:
                     self.bugs_count += 1
                     if randint(0, self.bugs_count) in (2, 5, 7, 10, 16, 29, 42, 58, 71, 84, 88, 90, 100):
                         self.scales.append(Scales(bug.x, bug.y,
-                                                 'Инфа.png'))
+                                                  'Инфа.png'))
 
                     if 1:
                         self.weapons.append(Weapon(bug.x, bug.y,
                                                    randint(0, 1), randint(100, 100),
                                                    randint(100, 100)))
+                        self.armors.append(Armor(bug.x, bug.y, 'пустой_перс_всё_для_куздница/итем_брони.png',
+                                                 randint(100, 100),
+                                                 randint(100, 100)))
 
                     self.bugs.remove(bug)
 
             for artifact in self.artifacts:
                 artifact.draw(self.win)
                 dist = artifact.dist(self.character_x, self.character_y)
-                if dist < 50:
+                if dist < 200:
                     self.player.add_artifact()
                     self.artifacts.remove(artifact)
 
-            prov_game_objects(self.scales, self.weapons, self.armors, self.win, self.character_x, self.character_y, self.player, keys)
+            prov_game_objects(self.scales, self.weapons, self.armors, self.win, self.character_x, self.character_y,
+                              self.player, keys)
 
             hp_text = font.render(f"Здоровье: {self.player.hp}", True, (255, 255, 255))
-            bugs_count_text = font.render(f"Количество убитых жуков: {self.bugs_count}, ЖИВОДЁР!", True,
-                                                    (255, 255, 255))
+            bugs_count_text = font.render(f"Количество расчленённых жуков: {self.player.scale}, ЖИВОДЁР!", True,
+                                          (255, 255, 255))
             if self.player.hp <= 0:
                 hp_text = font.render(f"Вы умерли", True, (255, 255, 255))
                 live = 0
-                res = False
+                res = -1
                 self.bugs = []
                 start_bugs = time.time() + 10 * 10
                 for event in pygame.event.get():
@@ -234,7 +237,7 @@ class Game:
         state['win'] = ''
         state['background'] = self.background
         print(type(state['background']))
-        print(type( self.background))
+        print(type(self.background))
         state['bugy'] = bugs
         state['bugs'] = []
         state['scales'] = []
@@ -261,7 +264,7 @@ class Game:
         for bug in self.bugy:
             self.bugs.append(Bug(bug[0], bug[1], bug[2], self.level))
 
-        #self.bugs = bugs
+        # self.bugs = bugs
         for artifacts in self.artifacts:
             artifacts.image = pygame.image.fromstring(artifacts.image, (30, 30), "RGBA")
         print(type(self.background))
@@ -274,8 +277,8 @@ if __name__ == "__main__":
     win_width, win_height = infoObject.current_w, infoObject.current_h
     # Загрузка изображения заднего плана
     background = pygame.image.load('задник.png')
-    #background = pygame.transform.scale(background,
-                                        #(win_width * 20, win_height * 20))  # новые размеры персонажа
+    # background = pygame.transform.scale(background,
+    # (win_width * 20, win_height * 20))  # новые размеры персонажа
 
     a = Game(background, 1)
 
@@ -283,4 +286,3 @@ if __name__ == "__main__":
         a = pickle.load(fp)'''
 
     a.game()
-
