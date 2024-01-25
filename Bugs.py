@@ -73,7 +73,7 @@ class Game:
         self.player = Players(self.character_x, self.character_y, self.win_width, self.win_height)
 
         # Установка параметров заднего плана
-        self.bg_x, self.bg_y = 0, 0
+        self.bg_x, self.bg_y = -self.win_width * 9.6, -self.win_height * 9.1
         self.bg_width, self.bg_height = background.get_size()
 
         # Создание жуков
