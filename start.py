@@ -210,8 +210,8 @@ class Main_Window():
         if results['win'] == 3:
             win_or_fail = 'Победа'
             # Изменение общей статистики
-            self.cursor.execute("""UPDATE Gamer SET count_win = ?
-                                        WHERE id_gamer=?""", (information_gamer[3] + 1, self.id_gamer))
+            self.cursor.execute("""UPDATE Gamer SET count_win = ?, count_coins = ?
+                                        WHERE id_gamer=?""", (information_gamer[3] + 1, information_gamer[7] + 10, self.id_gamer))
         else:
             win_or_fail = 'Поражение'
             # Изменение общей статистики
