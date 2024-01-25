@@ -64,14 +64,16 @@ class Players:
         return vel_bg_x, vel_bg_y, bg_x, bg_y
 
     def check_character_bounds(self, new_character_x, new_character_y, bg_x, bg_y):
-        self.boundary = 300 #количество пикселей, формирующих прямоугольник в котором ходит персонаж
+        self.boundary = 420 #количество пикселей, формирующих прямоугольник в котором ходит персонаж
         vel_bg_x, vel_bg_y = 0, 0
 
-        if not self.boundary <= new_character_y <= self.win_height - self.boundary:
+        if not (self.boundary <= new_character_y + 300 and new_character_y  <= self.win_height - self.boundary): #проверяет что
+            # персонаж не выходит из "невидимомго" прямоугольника по координатам У с учетом что спрайт персонажа имеет размеры
             bg_y, vel_bg_y, new_character_y = self.update_position(new_character_y, self.y, self.win_height, bg_y,
                                                                    self.speed)
 
-        if not self.boundary <= new_character_x <= self.win_width - self.boundary:
+        if not (self.boundary <= new_character_x + 210 and new_character_x <= self.win_width - self.boundary): # аналогично,
+            #проверяет что персонаж не выходит из "невидимомго" прямоугольника по координатам Х с учетом что спрайт персонажа имеет размеры
             bg_x, vel_bg_x, new_character_x = self.update_position(new_character_x, self.x, self.win_width, bg_x,
                                                                    self.speed)
 
