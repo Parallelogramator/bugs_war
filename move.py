@@ -11,8 +11,8 @@ class Players:
 
         self.win_width = win_width
         self.win_height = win_height
-        self.player_left = pygame.image.load(
-            'персонаж облаченный зеленый.png')  # сам спрайт (изначально персонаж повернут влево)
+        self.path = ['персонаж.png']
+        self.player_left = pygame.image.load('пустой_перс_всё_для_куздница'+'_'.join(self.path))  # сам спрайт (изначально персонаж повернут влево)
         # player_left = pygame.transform.scale(player_left, (win_width // 400 * 70, win_width // 400 * 100))
         self.player_right = pygame.transform.flip(self.player_left, True, False)  # приколы с поворотом
 

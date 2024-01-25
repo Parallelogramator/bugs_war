@@ -227,7 +227,7 @@ class Game:
             artifacts.image = pygame.image.tostring(artifacts.image, "RGBA")
 
         '''self.player_left = pygame.image.load(
-            'персонаж облаченный зеленый.png')  # сам спрайт (изначально персонаж повернут влево)
+            'персонаж_броня.png')  # сам спрайт (изначально персонаж повернут влево)
         # player_left = pygame.transform.scale(player_left, (win_width // 400 * 70, win_width // 400 * 100))
         self.player_right = pygame.transform.flip(self.player_left, True, False)  # приколы с поворотом
 
