@@ -46,9 +46,10 @@ class Weapon(game_object):
         self.image = pygame.image.load(weapon_image[image])
         self.image = pygame.transform.scale(self.image, (50, 50))
         self.rang, self.damage = rang, damage
+        self.image_path = weapon_image[image]
 
     def get_char(self):
-        return {'rang': self.rang, 'attack': self.damage, 'image': pygame.transform.scale(self.image, (50, 50))}
+        return {'rang': self.rang, 'attack': self.damage, 'image': self.image_path, 'path' : pygame.transform.scale(self.image, (50, 50))}
 
 
 class Scales(game_object):

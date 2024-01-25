@@ -11,17 +11,14 @@ class Players:
 
         self.win_width = win_width
         self.win_height = win_height
-        self.path = ['персонаж.png']
-        self.player_left = pygame.image.load('пустой_перс_всё_для_куздница'+'_'.join(self.path))  # сам спрайт (изначально персонаж повернут влево)
-        # player_left = pygame.transform.scale(player_left, (win_width // 400 * 70, win_width // 400 * 100))
-        self.player_right = pygame.transform.flip(self.player_left, True, False)  # приколы с поворотом
+        self.path = ['персонаж', '', '']
 
-        self.image = self.player_left
         self.hp = 100
 
         self.all_weapon = []
         self.all_weapon_sprites = pygame.sprite.Group()
 
+        self.images()
         self.base_attack = 10
         self.current_weapon = 0
         self.artifact = 0
@@ -64,7 +61,7 @@ class Players:
         return vel_bg_x, vel_bg_y, bg_x, bg_y
 
     def check_character_bounds(self, new_character_x, new_character_y, bg_x, bg_y):
-        self.boundary = self.win_height// 2  #количество пикселей, формирующих прямоугольник в котором ходит персонаж
+        self.boundary = self.win_height // 2  #количество пикселей, формирующих прямоугольник в котором ходит персонаж
         vel_bg_x, vel_bg_y = 0, 0
 
         if not (self.boundary <= new_character_y + 300 and new_character_y  <= self.win_height - self.boundary): #проверяет что
@@ -93,6 +90,14 @@ class Players:
 
         return bg_pos, vel_bg, new_character_pos
 
+    def images(self):
+        self.player_left = pygame.image.load(
+            'пустой_перс_всё_для_куздница/' + '_'.join(self.path)+'.png')  # сам спрайт (изначально персонаж повернут влево)
+        # player_left = pygame.transform.scale(player_left, (win_width // 400 * 70, win_width // 400 * 100))
+        self.player_right = pygame.transform.flip(self.player_left, True, False)  # приколы с поворотом
+
+        self.image = self.player_left
+
     def draw(self, win):
         win.blit(self.image, (self.x, self.y))
 
@@ -103,20 +108,26 @@ class Players:
     def add_weapon(self, char):
         self.sprite = pygame.sprite.Sprite()
         # определим его вид
-        self.sprite.image = char.get('image')
+        self.sprite.image = char.get('path')
         # и размеры
         a = False
 
         if len(self.weapon) == 2:
             self.sprite.rect = (50, 50+(51*(self.current_weapon)), 50, 50)
             # добавим спрайт в группу
-            char.pop('image')
+            char.pop('path')
             self.all_weapon_sprites.remove(self.all_weapon[self.current_weapon])
             a = self.all_weapon[self.current_weapon].image
             self.all_weapon[self.current_weapon] = self.sprite
             print(dir(self.sprite.image))
             self.all_weapon_sprites.add(self.sprite)
             self.weapon[self.current_weapon] = char
+            try:
+                self.path[2] = self.weapon[self.current_weapon].get('image').split('.')[0]
+
+            except AttributeError:
+                self.path[2] = ''
+            self.images()
         else:
             self.sprite.rect = (50, 101, 50, 50)
             # добавим спрайт в группу
@@ -124,16 +135,24 @@ class Players:
 
             self.all_weapon.append(self.sprite)
 
-            char.pop('image')
+            char.pop('path')
             self.weapon.append(char)
         print("Adding weapon")
         return a
 
     def change_weapon(self):
         self.current_weapon = (self.current_weapon+1) % 2
+        try:
+            self.path[2] = self.weapon[self.current_weapon].get('image').split('.')[0]
+
+        except AttributeError:
+            self.path[2] = ''
+        self.images()
 
     def add_armor(self, char):
         self.armor.append(char)
+        self.path[1] = 'броня'
+        self.images()
         print("Adding armor")
 
     def add_scale(self):
