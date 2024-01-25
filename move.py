@@ -64,7 +64,7 @@ class Players:
         return vel_bg_x, vel_bg_y, bg_x, bg_y
 
     def check_character_bounds(self, new_character_x, new_character_y, bg_x, bg_y):
-        self.boundary = 420 #количество пикселей, формирующих прямоугольник в котором ходит персонаж
+        self.boundary = self.win_height// 2  #количество пикселей, формирующих прямоугольник в котором ходит персонаж
         vel_bg_x, vel_bg_y = 0, 0
 
         if not (self.boundary <= new_character_y + 300 and new_character_y  <= self.win_height - self.boundary): #проверяет что
