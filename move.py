@@ -167,6 +167,9 @@ class Players:
         for i in self.armor:
             res += i['protection']
             i['strength'] -= 1
+            if i['strength'] <= 0:
+                self.armor.remove(i)
+                self.path[1] = ''
         return res
 
     def rang(self):

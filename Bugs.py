@@ -148,7 +148,7 @@ class Game:
                     if randint(0, self.bugs_count) in (2, 5, 7, 10, 16, 29, 42, 58, 71, 84, 88, 90, 100):
                         self.scales.append(Scales(bug.x, bug.y,
                                                   'Инфа.png'))
-
+                        вот тут эта настройка
                     if 1:
                         self.weapons.append(Weapon(bug.x, bug.y,
                                                    randint(0, 1), randint(100, 100),
