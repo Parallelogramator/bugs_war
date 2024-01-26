@@ -162,6 +162,7 @@ class Main_Window():
             """INSERT INTO Game(id_gamer, result, time, dead_bugs, hand_items, remaining_lives, path) VALUES(?, 0, 0, 0, 0, 0, 0)""",
             (self.id_gamer,))
         self.connection.commit()
+        result = 1
         self.id_game = self.cursor.execute(""" SELECT MAX(id_game) FROM Game""").fetchone()[0]  # Сохранение id игры
         file_path = os.path.join('data/', str(self.id_game))  # Путь к папке
         self.cursor.execute(
@@ -169,11 +170,11 @@ class Main_Window():
         self.connection.commit()
 
         # Создание игры
-        background = pygame.image.load('задник_1.png')
+        background = pygame.image.load(f'задник_{result+1}.png')
         self.background = pygame.transform.scale(background,
                                                  (self.win_width * 20, self.win_height * 20))  # новые размеры персонажа
 
-        self.game = Game(self.background, 0)
+        self.game = Game(self.background, 1)
 
         to_end = self.game.game()
 
@@ -190,9 +191,10 @@ class Main_Window():
         # Если игра завершилась поражением или победой
         try:
             if to_end['win'] == 3 or to_end['win'] == -1:
+                self.end_window(to_end)
                 self.game = None
                 os.remove(f"{file_path}.dat")
-                self.end_window(to_end)
+
         except Exception:
             pass
         # Иначе сохраняем данные по игре

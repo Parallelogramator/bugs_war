@@ -310,8 +310,9 @@ class Game:
         for artifacts in self.artifacts:
             artifacts.image = pygame.image.fromstring(artifacts.image, (30, 30), "RGBA")
         print(type(self.background))
-        self.background = pygame.image.fromstring(self.background, (self.win_width * 20, self.win_height * 20), 'RGBA')
-
+        background = pygame.image.load(f'задник_{1 + 1}.png')
+        self.background = pygame.transform.scale(background,
+                                                 (self.win_width * 20, self.win_height * 20))  # новые размеры персонажа
 
 if __name__ == "__main__":
     pygame.init()
