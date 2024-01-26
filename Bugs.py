@@ -4,7 +4,7 @@ from random import randint
 import pygame
 
 from move import Players, Bug
-from unmove import Artifact, Weapon, Armor, Scales
+from unmove import Artifact, Weapon, Armor, Scales, Smiths
 
 
 def soxrany_i_pomilui(vel_x, vel_y, bugs, artifacts, weapons, armors, scales):
@@ -22,7 +22,6 @@ def soxrany_i_pomilui(vel_x, vel_y, bugs, artifacts, weapons, armors, scales):
 
     for scale in scales:
         scale.pos_bg(vel_x, vel_y)
-
 
 def prov_game_objects(scales, weapons, armors, win, character_x, character_y, player, key):
     for scale in scales:
@@ -82,6 +81,7 @@ class Game:
         self.armors = []
         self.weapons = []
         self.scales = []
+        self.smiths = ['пустой_перс_всё_для_куздница/кузнец.png']
 
         x, y = 1, 1
         # self.walls = [(x, y)]
@@ -129,6 +129,13 @@ class Game:
                         bug.hp -= self.player.attack()
                         print("Персонаж бьет жука!")
 
+            if keys[pygame.K_SPACE]:  # Если нажата клавиша 'space', персонаж взаимодействует" с кузнецом
+                for smith in self.smiths:
+                    if sqrt((200 - self.character_x) ** 2 + (200 - self.character_y) ** 2) < self.player.rang():
+                        print("Персонаж взаимодействует с кузнецом!")
+                        #self.open_trade_window(smith)
+
+
             self.win.fill((0, 0, 0))  # Заполняем окно черным цветом
             self.win.blit(self.background,
                           (self.bg_x, self.bg_y))  # Рисуем задний план
@@ -148,7 +155,7 @@ class Game:
                     if randint(0, self.bugs_count) in (2, 5, 7, 10, 16, 29, 42, 58, 71, 84, 88, 90, 100):
                         self.scales.append(Scales(bug.x, bug.y,
                                                   'Инфа.png'))
-                        вот тут эта настройка
+                        #вот тут эта настройка
                     if 1:
                         self.weapons.append(Weapon(bug.x, bug.y,
                                                    randint(0, 1), randint(100, 100),
