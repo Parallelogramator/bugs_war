@@ -61,9 +61,8 @@ class Scales(game_object):
 class Smiths(game_object):
     def __init__(self, x, y, image):
         super().__init__(x, y)
-        self.image = pygame.image.load(smiths_image[image])
-        self.image = pygame.transform.scale(self.image, (90, 70))
-        self.image_path = smiths_image[image]
+        self.image = pygame.image.load(image)
+        self.image = pygame.transform.scale(self.image, (180, 140))
+
 
 weapon_image = ['меч_1.png', 'меч_большой.png']
-smiths_image = ['пустой_перс_всё_для_куздница/кузнец.png']

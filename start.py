@@ -169,7 +169,12 @@ class Main_Window():
         self.connection.commit()
 
         # Создание игры
+        background = pygame.image.load('задник_1.png')
+        self.background = pygame.transform.scale(background,
+                                                 (self.win_width * 20, self.win_height * 20))  # новые размеры персонажа
+
         self.game = Game(self.background, 0)
+
         to_end = self.game.game()
 
         # Сохранение данные по игре
@@ -257,6 +262,8 @@ class Main_Window():
             self.id_game, result = max(self.cursor.execute("""SELECT id_game, result FROM Game WHERE id_gamer=?""",
                                      (self.id_gamer,)).fetchall(), key=lambda x: x[0])
             if result != -1:
+
+                self.background = pygame.image.load(f'задник_{result+1}.png')
                 self.game = Game(self.background, result + 1)
             else:
                 with open(f"data/{self.id_game}.dat", "rb") as fp:

@@ -7,7 +7,7 @@ from move import Players, Bug
 from unmove import Artifact, Weapon, Armor, Scales, Smiths
 
 
-def soxrany_i_pomilui(vel_x, vel_y, bugs, artifacts, weapons, armors, scales):
+def soxrany_i_pomilui(vel_x, vel_y, bugs, artifacts, weapons, armors, scales, smits):
     for bug in bugs:
         bug.pos_bg(vel_x, vel_y)
 
@@ -23,7 +23,9 @@ def soxrany_i_pomilui(vel_x, vel_y, bugs, artifacts, weapons, armors, scales):
     for scale in scales:
         scale.pos_bg(vel_x, vel_y)
 
-def prov_game_objects(scales, weapons, armors, win, character_x, character_y, player, key):
+    smits.pos_bg(vel_x, vel_y)
+
+def prov_game_objects(scales, weapons, armors, smits, win, character_x, character_y, player, key):
     for scale in scales:
         scale.draw(win)
         dist = scale.dist(character_x, character_y)
@@ -51,6 +53,7 @@ def prov_game_objects(scales, weapons, armors, win, character_x, character_y, pl
             player.add_armor(armor.get_char())
             armors.remove(armor)
 
+    smits.draw(win)
 
 class Game:
     def __init__(self, background, level):
@@ -81,7 +84,7 @@ class Game:
         self.armors = []
         self.weapons = []
         self.scales = []
-        self.smiths = ['пустой_перс_всё_для_куздница/кузнец.png']
+        self.smiths = Smiths(self.win_width // 2, self.win_height // 2, 'пустой_перс_всё_для_куздница/кузнец.png')
 
         x, y = 1, 1
         # self.walls = [(x, y)]
@@ -120,7 +123,7 @@ class Game:
 
             vel_bg_x, vel_bg_y, self.bg_x, self.bg_y = self.player.move(keys, self.bg_x, self.bg_y)
 
-            soxrany_i_pomilui(vel_bg_x, vel_bg_y, self.bugs, self.artifacts, self.weapons, self.armors, self.scales)
+            soxrany_i_pomilui(vel_bg_x, vel_bg_y, self.bugs, self.artifacts, self.weapons, self.armors, self.scales, self.smiths)
             self.character_x, self.character_y = self.player.x, self.player.y
 
             if keys[pygame.K_SPACE]:  # Если нажата клавиша 'space', персонаж "бьет" жуков
@@ -129,10 +132,10 @@ class Game:
                         bug.hp -= self.player.attack()
                         print("Персонаж бьет жука!")
 
-            if keys[pygame.K_SPACE]:  # Если нажата клавиша 'space', персонаж взаимодействует" с кузнецом
-                for smith in self.smiths:
-                    if sqrt((200 - self.character_x) ** 2 + (200 - self.character_y) ** 2) < self.player.rang():
-                        print("Персонаж взаимодействует с кузнецом!")
+                # Если нажата клавиша 'space', персонаж взаимодействует" с кузнецом
+
+                if sqrt((self.smiths.x - self.character_x) ** 2 + (self.smiths.y - self.character_y) ** 2) < self.player.rang():
+                    print("Персонаж взаимодействует с кузнецом!")
                         #self.open_trade_window(smith)
 
 
@@ -173,7 +176,7 @@ class Game:
                     self.player.add_artifact()
                     self.artifacts.remove(artifact)
 
-            prov_game_objects(self.scales, self.weapons, self.armors, self.win, self.character_x, self.character_y,
+            prov_game_objects(self.scales, self.weapons, self.armors, self.smiths, self.win, self.character_x, self.character_y,
                               self.player, keys)
 
             hp_text = font.render(f"Здоровье: {self.player.hp}", True, (255, 255, 255))
@@ -280,14 +283,15 @@ class Game:
 
 if __name__ == "__main__":
     pygame.init()
+    level = 1
     infoObject = pygame.display.Info()
     win_width, win_height = infoObject.current_w, infoObject.current_h
     # Загрузка изображения заднего плана
-    background = pygame.image.load('задник.png')
+    background = pygame.image.load(f'задник_{level}.png')
     # background = pygame.transform.scale(background,
     # (win_width * 20, win_height * 20))  # новые размеры персонажа
 
-    a = Game(background, 1)
+    a = Game(background, level)
 
     '''with open("savegame.dat", "rb") as fp:
         a = pickle.load(fp)'''
