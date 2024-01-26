@@ -54,6 +54,22 @@ def prov_game_objects(scales, weapons, armors, smits, win, character_x, characte
             armors.remove(armor)
 
     smits.draw(win)
+class Button:
+    def __init__(self, image, x, y, visible):
+        self.image = image #получаем изображение
+        self.x = x
+        self.y = y
+        self.visible = visible
+
+    # Рисование текста
+    def draw(self, screen):
+        # Отрисовываем кнопку на экране, если она видима
+        if self.visible:
+            screen.blit(self.image, (self.x, self.y))
+            #self.draw_button()
+
+
+
 
 class Game:
     def __init__(self, background, level):
@@ -78,9 +94,9 @@ class Game:
 
         # Создание жуков
         self.bugs = [Bug(randint(0, self.win_width), randint(0, self.win_height), randint(1, 5), self.level)]
-        self.artifacts = [Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'Инфа.png'),
-                          Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'Инфа.png'),
-                          Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'Инфа.png')]
+        self.artifacts = [Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'артефакт1.png'),
+                          Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'артефакт2.png'),
+                          Artifact(randint(0, self.bg_width), randint(0, self.bg_height), 'артефакт3.png')]
         self.armors = []
         self.weapons = []
         self.scales = []
@@ -92,6 +108,20 @@ class Game:
         self.background = background
 
         self.time = time.time()
+
+    def open_trade_window(self, visible, count_):
+        self.screen = self.win_width, self.win_height  # размеры экрана
+        self.trade_window = Button(pygame.image.load('подложка_у_кузнеца.png'), self.win_width * 2 // 3,
+                                   self.win_height // 3, True)  # создаем торговое окно
+        self.close_button = Button(pygame.image.load('красная.png'), 0, 0, True)  # создаем кнопку закрытия
+        self.trade_window.visible = visible
+        self.close_button.visible = visible
+        self.trade_window.image = pygame.transform.scale(self.trade_window.image, (
+            self.win_width * 2 // 3, self.win_height // 3))  # изменяем размеры торгового окна
+        self.close_button.x = self.trade_window.x + self.trade_window.image.get_width() - self.close_button.image.get_width()  # располагаем кнопку закрытия в правом верхнем углу торгового окна
+        screen_surface = pygame.Surface(self.screen)
+        self.close_button.draw(screen_surface)
+        self.trade_window.draw(screen_surface)
 
     def game(self):
         live = 1
@@ -136,7 +166,8 @@ class Game:
 
                 if sqrt((self.smiths.x - self.character_x) ** 2 + (self.smiths.y - self.character_y) ** 2) < self.player.rang():
                     print("Персонаж взаимодействует с кузнецом!")
-                        #self.open_trade_window(smith)
+                    self.open_trade_window(True, self.player.scale)
+
 
 
             self.win.fill((0, 0, 0))  # Заполняем окно черным цветом
@@ -157,7 +188,7 @@ class Game:
                     self.bugs_count += 1
                     if randint(0, self.bugs_count) in (2, 5, 7, 10, 16, 29, 42, 58, 71, 84, 88, 90, 100):
                         self.scales.append(Scales(bug.x, bug.y,
-                                                  'Инфа.png'))
+                                                  'артефакт1.png'))
                         #вот тут эта настройка
                     if 1:
                         self.weapons.append(Weapon(bug.x, bug.y,
