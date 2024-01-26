@@ -189,11 +189,12 @@ class Game:
                     if randint(0, self.bugs_count) in (2, 5, 7, 10, 16, 29, 42, 58, 71, 84, 88, 90, 100):
                         self.scales.append(Scales(bug.x, bug.y,
                                                   'артефакт1.png'))
-                        #вот тут эта настройка
-                    if 1:
+
+                    if randint(0, self.bugs_count) in (2, 5, 7, 10, 16, 29, 42, 58, 71, 84, 88, 90, 100):
                         self.weapons.append(Weapon(bug.x, bug.y,
                                                    randint(0, 1), randint(100, 100),
                                                    randint(100, 100)))
+                    if randint(0, self.bugs_count) in (3, 5, 9, 11, 16, 29, 52, 58, 71, 84, 88, 90, 100):
                         self.armors.append(Armor(bug.x, bug.y, 'пустой_перс_всё_для_куздница/итем_брони.png',
                                                  randint(100, 100),
                                                  randint(100, 100)))
