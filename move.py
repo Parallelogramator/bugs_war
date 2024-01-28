@@ -61,16 +61,18 @@ class Players:
         return vel_bg_x, vel_bg_y, bg_x, bg_y
 
     def check_character_bounds(self, new_character_x, new_character_y, bg_x, bg_y):
-        self.boundary = self.win_height // 2  #количество пикселей, формирующих прямоугольник в котором ходит персонаж
+        self.boundary = self.win_height // 2  # количество пикселей, формирующих прямоугольник в котором ходит персонаж
         vel_bg_x, vel_bg_y = 0, 0
 
-        if not (self.boundary <= new_character_y + 200 and new_character_y  <= self.win_height - self.boundary): #проверяет что
+        if not (
+                self.boundary <= new_character_y + 200 and new_character_y <= self.win_height - self.boundary):  # проверяет что
             # персонаж не выходит из "невидимомго" прямоугольника по координатам У с учетом что спрайт персонажа имеет размеры
             bg_y, vel_bg_y, new_character_y = self.update_position(new_character_y, self.y, self.win_height, bg_y,
                                                                    self.speed)
 
-        if not (self.boundary <= new_character_x + 140 and new_character_x <= self.win_width - self.boundary): # аналогично,
-            #проверяет что персонаж не выходит из "невидимомго" прямоугольника по координатам Х с учетом что спрайт персонажа имеет размеры
+        if not (
+                self.boundary <= new_character_x + 140 and new_character_x <= self.win_width - self.boundary):  # аналогично,
+            # проверяет что персонаж не выходит из "невидимомго" прямоугольника по координатам Х с учетом что спрайт персонажа имеет размеры
             bg_x, vel_bg_x, new_character_x = self.update_position(new_character_x, self.x, self.win_width, bg_x,
                                                                    self.speed)
 
@@ -92,7 +94,8 @@ class Players:
 
     def images(self):
         self.player_left = pygame.image.load(
-            'пустой_перс_всё_для_куздница/' + '_'.join(self.path)+'.png')  # сам спрайт (изначально персонаж повернут влево)
+            'пустой_перс_всё_для_куздница/' + '_'.join(
+                self.path) + '.png')  # сам спрайт (изначально персонаж повернут влево)
         # player_left = pygame.transform.scale(player_left, (win_width // 400 * 70, win_width // 400 * 100))
         self.player_right = pygame.transform.flip(self.player_left, True, False)  # приколы с поворотом
 
@@ -113,7 +116,7 @@ class Players:
         a = False
 
         if len(self.weapon) == 2:
-            self.sprite.rect = (50, 50+(51*(self.current_weapon)), 50, 50)
+            self.sprite.rect = (50, 50 + (51 * (self.current_weapon)), 50, 50)
             # добавим спрайт в группу
             char.pop('path')
             self.all_weapon_sprites.remove(self.all_weapon[self.current_weapon])
@@ -141,7 +144,7 @@ class Players:
         return a
 
     def change_weapon(self):
-        self.current_weapon = (self.current_weapon+1) % 2
+        self.current_weapon = (self.current_weapon + 1) % 2
         try:
             self.path[2] = self.weapon[self.current_weapon].get('image').split('.')[0]
 
@@ -185,7 +188,7 @@ class Bug:
         self.bug_right = self.animation_frames
         self.bug_left = [pygame.transform.flip(image, True, False) for image in self.bug_right]
         self.image = self.bug_right[0]
-        self.current_frame = 0 #кадрик анимации
+        self.current_frame = 0  # кадрик анимации
         self.hp = 20
 
     def move_towards(self, target_x, target_y):
@@ -215,11 +218,36 @@ class Bug:
         self.y += vel_y
 
 
-bugs_image = [[pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг1.png'), pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг2.png'),
-                                 pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг3.png'), pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг4.png'),
-                                 pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг5.png'), pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг6.png'),
-                                 pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг7.png'), pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг8.png'),
-                                 pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг9.png'), pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг10.png'),
-                                 pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг11.png'), pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг12.png'),
-                                 pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг13.png'), pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг14.png'),
-                                 pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг15.png'), pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг16.png')], 'жук_фиолетовый.png']
+bugs_image = [[pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг1.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг2.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг3.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг4.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг5.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг6.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг7.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг8.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг9.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг10.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг11.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг12.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг13.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг14.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг15.png'),
+               pygame.image.load('анимация_самого_простотго_жука_зеленой/жуг16.png')],
+              [pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый1.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый2.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый3.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый4.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый5.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый6.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый7.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый8.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый9.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый10.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый11.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый12.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый13.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый14.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый15.png'),
+               pygame.image.load('анимация_ходьбы_фолетового/жук_фиолетовый16.png'),
+               ]]

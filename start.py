@@ -47,7 +47,7 @@ class Main_Window():
         self.cursor = self.connection.cursor()
 
         # Загрузка изображения заднего плана
-        background = pygame.image.load('задник.png')
+        background = pygame.image.load('задник_1.png')
         self.background = pygame.transform.scale(background,
                                                  (self.win_width * 20, self.win_height * 20))  # новые размеры персонажа
 
